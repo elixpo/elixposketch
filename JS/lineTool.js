@@ -188,10 +188,6 @@ class Line {
     selectLine() {
     this.isSelected = true;
     this.addAnchors();
-    // Show line sidebar when selected
-    disableAllSideBars();
-    lineSideBar.classList.remove("hidden");
-    this.updateSidebar();
 }
 
 deselectLine() {
@@ -276,6 +272,11 @@ removeSelection() {
     middleAnchor.dataset.index = 2;
     this.group.appendChild(middleAnchor);
     this.anchors[2] = middleAnchor;
+
+    // Show line sidebar
+    disableAllSideBars();
+    lineSideBar.classList.remove("hidden");
+    this.updateSidebar();
     }
 
     isNearAnchor(x, y) {
