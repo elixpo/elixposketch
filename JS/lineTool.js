@@ -1,7 +1,5 @@
 import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from './undoAndRedo.js';
 import { updateAttachedArrows as updateArrowsForShape, cleanupAttachments } from './drawArrow.js';
-
-// Update event handlers to use the Line class
 let isDrawingLine = false;
 let currentLine = null;
 let lineStartX = 0;      
@@ -16,8 +14,6 @@ let lineSktetchRate = 3;
 let isDraggingLine = false;
 let dragOldPosLine = null;
 let copiedShapeData = null;
-
-// Frame attachment variables
 let draggedShapeInitialFrameLine = null;
 let hoveredFrameLine = null;
 
