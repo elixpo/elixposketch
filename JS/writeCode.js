@@ -1423,6 +1423,9 @@ function selectCodeBlock(groupElement) {
     toggleSpans.forEach(el => {
         if (el.getAttribute("data-id") === "true") el.classList.add("selected");
     });
+    // Show the text/code property panel
+    const textSideBar = document.getElementById("textToolBar");
+    if (textSideBar) textSideBar.classList.remove("hidden");
     const langSelector = document.getElementById("textLanguageSelector");
     if (langSelector) langSelector.classList.remove("hidden");
     const langSelect = document.getElementById("codeLanguageSelect");
