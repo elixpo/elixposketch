@@ -7,6 +7,11 @@ const CATEGORIES = [
   { value: null, label: 'All', icon: 'bxs-grid-alt' },
   { value: 'tech', label: 'Tech', icon: 'bxs-chip' },
   { value: 'devops', label: 'DevOps', icon: 'bxs-server' },
+  { value: 'design', label: 'Design', icon: 'bxs-palette' },
+  { value: 'social media', label: 'Social', icon: 'bxs-share-alt' },
+  { value: 'navigation', label: 'Nav', icon: 'bxs-navigation' },
+  { value: 'business', label: 'Business', icon: 'bxs-briefcase' },
+  { value: 'media', label: 'Media', icon: 'bxs-videos' },
 ]
 
 export default function IconSidebar() {
@@ -25,7 +30,7 @@ export default function IconSidebar() {
       if (cat && !q) q = cat
       else if (cat && q) q = `${cat} ${q}`
 
-      const url = q ? `/api/icons/search?q=${encodeURIComponent(q)}` : `/api/icons/search?q=general`
+      const url = q ? `/api/icons/search?q=${encodeURIComponent(q)}` : `/api/icons/feed?offset=0&limit=60`
       const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
@@ -56,10 +61,10 @@ export default function IconSidebar() {
 
   const handleIconClick = async (iconName) => {
     try {
-      const res = await fetch(`/api/icons/serve?name=${encodeURIComponent(iconName)}`)
+      // Fetch SVG directly from public folder
+      const res = await fetch(`/icons/${encodeURIComponent(iconName)}`)
       if (res.ok) {
         const svgText = await res.text()
-        // Set the icon to place via the global that iconTool.js reads
         if (typeof window !== 'undefined') {
           window.iconToPlace = svgText
         }
@@ -71,16 +76,17 @@ export default function IconSidebar() {
 
   return (
     <div
-      className={`absolute bottom-14 left-1/2 -translate-x-1/2 w-[460px] max-w-[92vw] bg-[#1a1a1a] border border-white/[0.08] rounded-2xl z-[999] font-[lixFont] transition-all duration-200 overflow-hidden ${
+      className={`absolute bottom-14 left-1/2 -translate-x-1/2 w-[80%] max-w-[1100px] bg-[#1a1a1a] border border-white/[0.08] rounded-2xl z-[999] font-[lixFont] transition-all duration-200 overflow-hidden ${
         visible
           ? 'opacity-100 pointer-events-auto translate-y-0'
           : 'opacity-0 pointer-events-none translate-y-3'
       }`}
       style={{ backdropFilter: 'blur(12px)' }}
     >
-      {/* Search */}
-      <div className="px-3 pt-3 pb-2">
-        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-xl px-2.5 py-1.5">
+      {/* Search + Categories row */}
+      <div className="flex items-center gap-3 px-4 pt-3.5 pb-2.5">
+        {/* Search */}
+        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 py-2 w-[260px] shrink-0">
           <i className="bx bxs-search text-text-dim text-base" />
           <input
             id="iconSearchInput"
@@ -97,48 +103,48 @@ export default function IconSidebar() {
             </button>
           )}
         </div>
-      </div>
 
-      {/* Categories */}
-      <div className="flex items-center gap-1 px-3 pb-2">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.value || 'all'}
-            onClick={() => setCategory(cat.value)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all duration-150 ${
-              category === cat.value
-                ? 'bg-white/10 text-white'
-                : 'text-text-muted hover:bg-white/[0.05] hover:text-text-primary'
-            }`}
-          >
-            <i className={`bx ${cat.icon} text-sm`} />
-            {cat.label}
-          </button>
-        ))}
+        {/* Categories */}
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.value || 'all'}
+              onClick={() => setCategory(cat.value)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-all duration-150 ${
+                category === cat.value
+                  ? 'bg-white/10 text-white'
+                  : 'text-text-muted hover:bg-white/[0.05] hover:text-text-primary'
+              }`}
+            >
+              <i className={`bx ${cat.icon} text-base`} />
+              {cat.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Icon grid */}
-      <div className="px-3 pb-3 max-h-[260px] overflow-y-auto scrollbar-hide" id="iconsContainer">
+      <div className="px-4 pb-4 max-h-[320px] overflow-y-auto no-scrollbar" id="iconsContainer">
         {loading ? (
-          <div className="flex items-center justify-center py-6 text-text-dim text-sm">
-            <i className="bx bxs-hourglass bx-spin text-lg mr-2" />
-            Loading...
+          <div className="flex items-center justify-center py-8 text-text-dim text-sm">
+            <i className="bx bxs-hourglass bx-spin text-xl mr-2" />
+            Loading icons...
           </div>
         ) : icons.length === 0 ? (
-          <div className="flex items-center justify-center py-6 text-text-dim text-sm">
+          <div className="flex items-center justify-center py-8 text-text-dim text-sm">
             No icons found
           </div>
         ) : (
-          <div className="grid grid-cols-8 gap-1.5">
+          <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(52px, 1fr))' }}>
             {icons.map((icon, i) => (
               <button
                 key={icon.filename || i}
                 onClick={() => handleIconClick(icon.filename)}
-                title={icon.filename?.replace('.svg', '') || ''}
-                className="w-12 h-12 flex items-center justify-center rounded-lg hover:bg-white/[0.08] transition-all duration-150 text-white/80 hover:text-white"
+                title={icon.filename?.replace('.svg', '').replace(/_/g, ' ') || ''}
+                className="aspect-square flex items-center justify-center rounded-lg hover:bg-white/[0.08] transition-all duration-150 text-white/80 hover:text-white"
               >
                 <img
-                  src={`/api/icons/serve?name=${encodeURIComponent(icon.filename)}`}
+                  src={`/icons/${encodeURIComponent(icon.filename)}`}
                   alt=""
                   className="w-7 h-7 invert"
                   loading="lazy"
