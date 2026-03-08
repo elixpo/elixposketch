@@ -1,6 +1,6 @@
 /* eslint-disable */
 // Arrow tool event handlers - extracted from drawArrow.js
-import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from '../../../JS/undoAndRedo.js';
+import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from '../core/UndoRedo.js';
 
 
 let arrowStartX, arrowStartY;

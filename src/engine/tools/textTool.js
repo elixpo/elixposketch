@@ -9,8 +9,8 @@ import {
     pushFrameAttachmentAction,
     setTextReferences,
     updateSelectedElement
-} from '../../../JS/undoAndRedo.js';
-import { cleanupAttachments, updateAttachedArrows } from '../../../JS/drawArrow.js';
+} from '../core/UndoRedo.js';
+import { cleanupAttachments, updateAttachedArrows } from './arrowTool.js';
 import {
     addCodeBlock,
     wrapCodeElement,
@@ -23,7 +23,7 @@ import {
     setCodeLanguage,
     getCodeLanguage,
     getSelectedCodeBlock
-} from '../../../JS/writeCode.js';
+} from './codeTool.js';
 
 let textSize = "30px";
 let textFont = "lixFont";

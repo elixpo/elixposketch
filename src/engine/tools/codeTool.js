@@ -8,8 +8,8 @@ import {
     pushFrameAttachmentAction,
     setTextReferences,
     updateSelectedElement
-} from '../../../JS/undoAndRedo.js';
-import { cleanupAttachments, updateAttachedArrows } from '../../../JS/drawArrow.js';
+} from '../core/UndoRedo.js';
+import { cleanupAttachments, updateAttachedArrows } from './arrowTool.js';
 
 let codeTextSize = "25px";
 let codeTextFont = "lixCode";

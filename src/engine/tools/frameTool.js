@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Frame tool event handlers - extracted from frameHolder.js
-import { pushCreateAction, pushDeleteAction, pushTransformAction, pushFrameAttachmentAction } from '../../../JS/undoAndRedo.js';
-import { updateAttachedArrows, cleanupAttachments } from '../../../JS/drawArrow.js';
+import { pushCreateAction, pushDeleteAction, pushTransformAction, pushFrameAttachmentAction } from '../core/UndoRedo.js';
+import { updateAttachedArrows, cleanupAttachments } from './arrowTool.js';
 
 let currentFrame = null;
 let isResizing = false;

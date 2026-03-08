@@ -2,17 +2,17 @@
 // Event dispatcher - extracted from eventListeners.js
 // Central event routing for all tools
 
-import { handleMouseDownRect, handleMouseMoveRect, handleMouseUpRect } from '../../../JS/drawSquare.js';
-import { handleMouseDownArrow, handleMouseMoveArrow, handleMouseUpArrow } from '../../../JS/drawArrow.js';
-import { handleMouseDownCircle, handleMouseMoveCircle, handleMouseUpCircle } from '../../../JS/drawCircle.js';
-import { handleMouseUpImage, handleMouseDownImage, handleMouseMoveImage } from '../../../JS/imageTool.js';
-import { handleMouseDownLine, handleMouseMoveLine, handleMouseUpLine } from '../../../JS/lineTool.js';
-import { handleFreehandMouseDown, handleFreehandMouseMove, handleFreehandMouseUp } from '../../../JS/canvasStroke.js';
-import { handleTextMouseDown, handleTextMouseMove, handleTextMouseUp } from '../../../JS/writeText.js';
-import { handleMouseDownFrame, handleMouseMoveFrame, handleMouseUpFrame } from '../../../JS/frameHolder.js';
-import { handleMultiSelectionMouseDown, handleMultiSelectionMouseMove, handleMultiSelectionMouseUp, removeMultiSelectionRect, multiSelection, isMultiSelecting} from '../../../JS/selection.js';
-import { handleMouseDownIcon, handleMouseMoveIcon, handleMouseUpIcon } from '../../../JS/icons.js';
-import { handleCodeMouseDown, handleCodeMouseMove, handleCodeMouseUp } from '../../../JS/writeCode.js';
+import { handleMouseDownRect, handleMouseMoveRect, handleMouseUpRect } from '../tools/rectangleTool.js';
+import { handleMouseDownArrow, handleMouseMoveArrow, handleMouseUpArrow } from '../tools/arrowTool.js';
+import { handleMouseDownCircle, handleMouseMoveCircle, handleMouseUpCircle } from '../tools/circleTool.js';
+import { handleMouseUpImage, handleMouseDownImage, handleMouseMoveImage } from '../tools/imageTool.js';
+import { handleMouseDownLine, handleMouseMoveLine, handleMouseUpLine } from '../tools/lineTool.js';
+import { handleFreehandMouseDown, handleFreehandMouseMove, handleFreehandMouseUp } from '../tools/freehandTool.js';
+import { handleTextMouseDown, handleTextMouseMove, handleTextMouseUp } from '../tools/textTool.js';
+import { handleMouseDownFrame, handleMouseMoveFrame, handleMouseUpFrame } from '../tools/frameTool.js';
+import { handleMultiSelectionMouseDown, handleMultiSelectionMouseMove, handleMultiSelectionMouseUp, removeMultiSelectionRect, multiSelection, isMultiSelecting} from './Selection.js';
+import { handleMouseDownIcon, handleMouseMoveIcon, handleMouseUpIcon } from '../tools/iconTool.js';
+import { handleCodeMouseDown, handleCodeMouseMove, handleCodeMouseUp } from '../tools/codeTool.js';
 
 const handleMainMouseDown = (e) => {
     if (isSquareToolActive) {

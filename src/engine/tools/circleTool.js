@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Circle tool event handlers - extracted from drawCircle.js
-import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from '../../../JS/undoAndRedo.js';
-import { cleanupAttachments } from '../../../JS/drawArrow.js';
+import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from '../core/UndoRedo.js';
+import { cleanupAttachments } from './arrowTool.js';
 
 let isDrawingCircle = false;
 let isDraggingShapeCircle = false;

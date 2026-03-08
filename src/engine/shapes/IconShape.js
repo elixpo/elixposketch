@@ -1,7 +1,7 @@
 /* eslint-disable */
 // IconShape class - extracted from icons.js
 // Depends on globals: svg, shapes
-import { updateAttachedArrows as updateArrowsForShape } from '../../../JS/drawArrow.js';
+import { updateAttachedArrows as updateArrowsForShape } from '../tools/arrowTool.js';
 
 function getSVGElement() {
     return document.getElementById('freehand-canvas');

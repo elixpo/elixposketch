@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Line tool event handlers - extracted from lineTool.js
-import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from '../../../JS/undoAndRedo.js';
-import { updateAttachedArrows as updateArrowsForShape, cleanupAttachments } from '../../../JS/drawArrow.js';
+import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from '../core/UndoRedo.js';
+import { updateAttachedArrows as updateArrowsForShape, cleanupAttachments } from './arrowTool.js';
 
 let isDrawingLine = false;
 let currentLine = null;

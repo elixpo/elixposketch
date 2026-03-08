@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Multi-selection system - copied from selection.js
 
-import { cleanupAttachments } from '../../../JS/drawArrow.js';
+import { cleanupAttachments } from '../tools/arrowTool.js';
 
 let isMultiSelecting = false;
 let multiSelectionStart = { x: 0, y: 0 };

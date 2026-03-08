@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Freehand tool event handlers - extracted from canvasStroke.js
-import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from '../../../JS/undoAndRedo.js';
-import { updateAttachedArrows as updateArrowsForShape, cleanupAttachments } from '../../../JS/drawArrow.js';
+import { pushCreateAction, pushDeleteAction, pushOptionsChangeAction, pushTransformAction, pushFrameAttachmentAction } from '../core/UndoRedo.js';
+import { updateAttachedArrows as updateArrowsForShape, cleanupAttachments } from './arrowTool.js';
 
 
 const strokeColors = document.querySelectorAll(".strokeColors span");
