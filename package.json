@@ -9,7 +9,6 @@
     "fuse.js": "^7.1.0",
     "lodash": "^4.17.21",
     "next": "^15.5.12",
-    "nodemon": "^3.1.10",
     "perfect-freehand": "^1.2.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -19,15 +18,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",
-    "concurrently": "^8.2.0",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.1"
   },
   "scripts": {
-    "dev": "concurrently \"npm run backend:dev\" \"next dev\"",
+    "dev": "next dev",
     "build": "next build",
-    "start": "concurrently \"node api/iconsFetcher.js\" \"next start\"",
-    "backend": "node api/iconsFetcher.js",
-    "backend:dev": "nodemon api/iconsFetcher.js"
+    "start": "next start"
   }
 }
