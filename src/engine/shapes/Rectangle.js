@@ -1,6 +1,18 @@
 /* eslint-disable */
 // Rectangle shape class - extracted from drawSquare.js
 // Depends on globals: svg, shapes, rough, currentShape, currentZoom, rc
+
+// Create local rc from globals; tool-state vars default to false
+const rc = rough.svg(svg);
+let isDraggingShapeSquare = false;
+let isResizingShapeSquare = false;
+let isRotatingShapeSquare = false;
+let hoveredFrame = null;
+const SquarecolorOptions = document.querySelectorAll(".squareStrokeSpan");
+const backgroundColorOptionsSquare = document.querySelectorAll(".squareBackgroundSpan");
+const fillStyleOptions = document.querySelectorAll(".squareFillStyleSpan");
+const squareStrokeThicknessValue = document.querySelectorAll(".squareStrokeThickSpan");
+const squareOutlineStyleValue = document.querySelectorAll(".squareOutlineStyle");
 // Depends on globals: squareStrokecolor, squareBackgroundColor, squareFillStyleValue, squareStrokeThicknes, squareOutlineStyle
 // Depends on globals: isDraggingShapeSquare, isResizingShapeSquare, isRotatingShapeSquare
 // Depends on globals: squareSideBar, disableAllSideBars

@@ -2,6 +2,17 @@
 // Circle shape class - extracted from drawCircle.js
 // Depends on globals: svg, shapes, rough, currentShape, currentZoom, rc
 
+const rc = rough.svg(svg);
+let isDraggingShapeCircle = false;
+let isResizingShapeCircle = false;
+let isRotatingShapeCircle = false;
+let hoveredFrameCircle = null;
+const colorOptionsCircle = document.querySelectorAll(".circleStrokeSpan");
+const backgroundColorOptionsCircle = document.querySelectorAll(".circleBackgroundSpan");
+const fillStyleOptionsCircle = document.querySelectorAll(".circleFillStyleSpan");
+const strokeThicknessValueCircle = document.querySelectorAll(".circleStrokeThickSpan");
+const outlineStyleValueCircle = document.querySelectorAll(".circleOutlineStyle");
+
 class Circle {
     constructor(x, y, rx, ry, options = {}) {
         this.x = x; 

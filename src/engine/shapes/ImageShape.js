@@ -2,6 +2,11 @@
 // ImageShape class - extracted from imageTool.js
 // Depends on globals: svg, shapes, currentShape
 
+import { updateAttachedArrows as updateArrowsForShape } from "../tools/arrowTool.js";
+let isDragging = false;
+let hoveredFrameImage = null;
+function selectImage() {} // stub - image selection handled by imageTool
+
 class ImageShape {
     constructor(element) {
         this.element = element;

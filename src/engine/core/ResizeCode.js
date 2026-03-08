@@ -2,6 +2,34 @@
 // Code block resize utilities - copied from resizeCode.js
 
 
+let isResizing = false;
+let startDragX = 0;
+let startDragY = 0;
+let currentHandle = null;
+let originalBBox = null;
+let rectElement = null;
+let selectedElements = [];
+let svgCanvas = null;
+function screenToSVGCoords(x, y) {
+    const rect = svg.getBoundingClientRect();
+    const viewBox = svg.viewBox.baseVal;
+    return {
+        x: viewBox.x + ((x - rect.left) / rect.width) * viewBox.width,
+        y: viewBox.y + ((y - rect.top) / rect.height) * viewBox.height
+    };
+}
+function getCombinedBBox() {
+    if (!selectedElements.length) return { x: 0, y: 0, width: 0, height: 0 };
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    selectedElements.forEach(el => {
+        const b = el.getBBox();
+        minX = Math.min(minX, b.x);
+        minY = Math.min(minY, b.y);
+        maxX = Math.max(maxX, b.x + b.width);
+        maxY = Math.max(maxY, b.y + b.height);
+    });
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
 
 
 

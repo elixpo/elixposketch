@@ -2,6 +2,34 @@
 // CodeShape class - extracted from writeCode.js
 // Depends on globals: svg, shapes, currentShape
 
+function extractRotationFromTransform(el) {
+    const t = el.getAttribute("transform") || "";
+    const m = t.match(/rotate\(([^,)]+)/);
+    return m ? parseFloat(m[1]) : 0;
+}
+function updateAttachedArrows(wrapper) {
+    if (!wrapper || typeof shapes === "undefined") return;
+    shapes.forEach(s => {
+        if (s && s.shapeName === "arrow" && typeof s.updateAttachments === "function") {
+            if ((s.attachedToStart && s.attachedToStart.shape === wrapper) ||
+                (s.attachedToEnd && s.attachedToEnd.shape === wrapper)) {
+                s.updateAttachments();
+            }
+        }
+    });
+}
+function adjustCodeEditorSize(editor) {
+    if (!editor) return;
+    editor.style.height = "auto";
+    editor.style.height = editor.scrollHeight + "px";
+}
+let isCodeDragging = false;
+let hoveredCodeFrame = null;
+let selectedCodeBlock = null;
+function updateCodeSelectionFeedback() {}
+function deselectCodeBlock() { selectedCodeBlock = null; }
+function selectCodeBlock(el) { selectedCodeBlock = el; }
+
 class CodeShape {
     constructor(groupElement) {
         this.group = groupElement;

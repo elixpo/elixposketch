@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { getStroke } from "perfect-freehand";
 // FreehandStroke shape class - extracted from canvasStroke.js
 // Depends on globals: svg, shapes, currentShape, currentZoom, currentViewBox
 

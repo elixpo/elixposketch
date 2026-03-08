@@ -2,6 +2,29 @@
 // TextShape class - extracted from writeText.js
 // Depends on globals: svg, shapes, currentShape
 
+function extractRotationFromTransform(el) {
+    const t = el.getAttribute("transform") || "";
+    const m = t.match(/rotate\(([^,)]+)/);
+    return m ? parseFloat(m[1]) : 0;
+}
+function updateAttachedArrows(wrapper) {
+    if (!wrapper || typeof shapes === "undefined") return;
+    shapes.forEach(s => {
+        if (s && s.shapeName === "arrow" && typeof s.updateAttachments === "function") {
+            if ((s.attachedToStart && s.attachedToStart.shape === wrapper) ||
+                (s.attachedToEnd && s.attachedToEnd.shape === wrapper)) {
+                s.updateAttachments();
+            }
+        }
+    });
+}
+let isDragging = false;
+let hoveredFrameText = null;
+let selectedElement = null;
+function updateSelectionFeedback() {}
+function deselectElement() { selectedElement = null; }
+function selectElement(el) { selectedElement = el; }
+
 class TextShape {
     constructor(groupElement) {
         this.group = groupElement;

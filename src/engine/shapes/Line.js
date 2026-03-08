@@ -2,6 +2,10 @@
 // Line shape class - extracted from lineTool.js
 // Depends on globals: svg, shapes, rough, currentShape, currentZoom
 
+const rc = rough.svg(svg);
+const lineColor = "#fff";
+const lineStrokeWidth = 2;
+
 class Line {
     constructor(startPoint, endPoint, options = {}) {
         this.startPoint = startPoint;

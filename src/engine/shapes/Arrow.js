@@ -2,6 +2,9 @@
 // Arrow shape class - extracted from drawArrow.js
 // Depends on globals: svg, shapes, rough, currentShape, currentZoom
 
+let isDragging = false;
+let hoveredFrameArrow = null;
+
 function getSVGCoordsFromMouse(e) {
     const viewBox = svg.viewBox.baseVal;
     const rect = svg.getBoundingClientRect();
