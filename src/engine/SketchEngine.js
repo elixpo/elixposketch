@@ -283,6 +283,18 @@ class SketchEngine {
      * Sync tool flags from Zustand activeTool value.
      */
     setActiveTool(toolName) {
+        // Deselect current shape when switching tools
+        if (window.currentShape && typeof window.currentShape.removeSelection === 'function') {
+            window.currentShape.removeSelection();
+            window.currentShape = null;
+        }
+        if (typeof window.clearAllSelections === 'function') {
+            window.clearAllSelections();
+        }
+        if (typeof window.disableAllSideBars === 'function') {
+            window.disableAllSideBars();
+        }
+
         window.isPaintToolActive = false;
         window.isSquareToolActive = false;
         window.isCircleToolActive = false;

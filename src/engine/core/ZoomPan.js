@@ -45,16 +45,49 @@ function updateViewBox(anchorX = null, anchorY = null) {
 zoomInBtn.addEventListener("click", function() {
   currentZoom *= 1.1;
   if (currentZoom > maxScale) currentZoom = maxScale;
-  updateViewBox(); 
+  updateViewBox();
   updateZoomDisplay();
 });
 
 zoomOutBtn.addEventListener("click", function() {
   currentZoom /= 1.1;
   if (currentZoom < minScale) currentZoom = minScale;
-  updateViewBox(); 
+  updateViewBox();
   updateZoomDisplay();
 });
+
+// Exposed for React Footer buttons — zoom from center of canvas
+window.zoomFromCenter = function(direction) {
+  if (direction > 0) {
+    currentZoom *= 1.1;
+    if (currentZoom > maxScale) currentZoom = maxScale;
+  } else {
+    currentZoom /= 1.1;
+    if (currentZoom < minScale) currentZoom = minScale;
+  }
+  updateViewBox(); // null anchors = zoom from center
+  updateZoomDisplay();
+  // Sync React zoom state
+  if (window.__sketchStoreApi && window.__sketchStoreApi.setZoom) {
+    window.__sketchStoreApi.setZoom(currentZoom);
+  }
+};
+
+window.zoomReset = function() {
+  currentZoom = 1;
+  currentViewBox.x = 0;
+  currentViewBox.y = 0;
+  currentViewBox.width = window.innerWidth;
+  currentViewBox.height = window.innerHeight;
+  freehandCanvas.setAttribute(
+    "viewBox",
+    `0 0 ${window.innerWidth} ${window.innerHeight}`
+  );
+  updateZoomDisplay();
+  if (window.__sketchStoreApi && window.__sketchStoreApi.setZoom) {
+    window.__sketchStoreApi.setZoom(1);
+  }
+};
 
 freehandCanvas.addEventListener("wheel", function(e) {
   if (!e.ctrlKey) return;
@@ -108,8 +141,12 @@ freehandCanvas.addEventListener("wheel", function(e) {
     width: newViewBoxWidth,
     height: newViewBoxHeight
   };
-  
+
   updateZoomDisplay();
+  // Sync React zoom state
+  if (window.__sketchStoreApi && window.__sketchStoreApi.setZoom) {
+    window.__sketchStoreApi.setZoom(currentZoom);
+  }
 });
 
 // Function to resize the canvas to fill the screen (initial setup)

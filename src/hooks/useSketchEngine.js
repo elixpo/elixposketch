@@ -24,6 +24,7 @@ export default function useSketchEngine(svgRef, ready = true) {
           setSelectedShapeSidebar: (sidebar) => useSketchStore.getState().setSelectedShapeSidebar(sidebar),
           clearSelectedShapeSidebar: () => useSketchStore.getState().clearSelectedShapeSidebar(),
           setActiveTool: (tool) => useSketchStore.getState().setActiveTool(tool),
+          setZoom: (zoom) => useSketchStore.setState({ zoom }),
         }
 
         const { SketchEngine } = await import('@/engine/SketchEngine')
