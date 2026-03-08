@@ -449,3 +449,4 @@ export {
     handleMouseDown as handleMouseDownLine,
     handleMouseMove as handleMouseMoveLine,
     handleMouseUp as handleMouseUpLine,
+};

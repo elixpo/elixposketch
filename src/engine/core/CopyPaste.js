@@ -1,6 +1,7 @@
 /* eslint-disable */
-// Copy and Paste - copied from copyAndPaste.js
+// Copy and Paste - placeholder module
+// The original copyAndPaste.js was a minimal stub (97 bytes)
+// Copy/paste logic is handled via keyboard shortcuts in sketchGeneric.js
+// and the duplicateSelection function
 
-import { pushCreateAction } from './UndoRedo.js';
-
-// Utility to deep clone rectangle options
+export {};
