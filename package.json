@@ -1,5 +1,4 @@
-{ 
-  "type": "module",
+{
   "name": "lixsketch",
   "version": "1.0.0",
   "dependencies": {
@@ -9,20 +8,22 @@
     "express-rate-limit": "^8.0.1",
     "fuse.js": "^7.1.0",
     "lodash": "^4.17.21",
+    "next": "^15.5.12",
     "nodemon": "^3.1.10",
-    "redis": "^5.6.0"
+    "perfect-freehand": "^1.2.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "redis": "^5.6.0",
+    "roughjs": "^4.6.6"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0",
-    "connect-history-api-fallback": "^2.0.0",
-    "lite-server": "^2.6.1"
+    "concurrently": "^8.2.0"
   },
   "scripts": {
-    "frontend": "lite-server",
+    "dev": "concurrently \"npm run backend:dev\" \"next dev\"",
+    "build": "next build",
+    "start": "concurrently \"node api/iconsFetcher.js\" \"next start\"",
     "backend": "node api/iconsFetcher.js",
-    "backend:dev": "nodemon api/iconsFetcher.js",
-    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend\"",
-    "start": "node api/iconsFetcher.js",
-    "build": "echo 'No build step needed for static frontend'"
+    "backend:dev": "nodemon api/iconsFetcher.js"
   }
 }
