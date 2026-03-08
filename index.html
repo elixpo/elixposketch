@@ -430,9 +430,6 @@
 
         <div class="headerSection">
             <div class="appMenu">
-                <div class="hamburgerBtn" id="menuIcon">
-                    <i class='bx bx-menu'></i>
-                </div>
                 <div class="logo"></div>
                 <div class="headerDivider"></div>
                 <div class="workspaceName">
@@ -443,6 +440,9 @@
                 <i class='bx bx-help-circle'></i>
                 <button class="outsourceBtns shareBtn">Share</button>
                 <button class="outsourceBtns shareBtn">Ctrl + /</button>
+                <div class="hamburgerBtn" id="menuIcon">
+                    <i class='bx bx-menu'></i>
+                </div>
             </div>
         </div>
         <div class="footerSection">
@@ -458,7 +458,7 @@
     
         </div>
         <div class="menu hidden">
-            <span>
+            <span data-action="open">
                 <div class="content">
                     <i class='bx bxs-folder-open'></i>
                   <p>Open</p>
@@ -466,7 +466,7 @@
                 <div class="shortcut">Ctrl+O</div>
               </span>
 
-              <span>
+              <span data-action="save">
                 <div class="content">
                     <i class='bx bx-download' ></i>
                   <p>Save As</p>
@@ -474,7 +474,7 @@
                 <div class="shortcut">Ctrl+S</div>
               </span>
 
-              <span>
+              <span data-action="export">
                 <div class="content">
                     <i class='bx bxs-image-add' ></i>
                   <p>Export Image</p>
@@ -482,7 +482,7 @@
                 <div class="shortcut">Ctrl+E</div>
               </span>
 
-              <span>
+              <span data-action="shortcuts">
                 <div class="content special">
                     <i class='bx bxs-terminal'></i>
                   <p>Commands</p>
@@ -490,59 +490,59 @@
                 <div class="shortcut special">Ctrl+/</div>
               </span>
 
-              <span>
+              <span data-action="find">
                 <div class="content">
-                  <i class='bx  bx-search'  ></i> 
+                  <i class='bx bx-search'></i>
                   <p>Find Text</p>
                 </div>
                 <div class="shortcut">Ctrl+F</div>
               </span>
 
-              <span>
+              <span data-action="help">
                 <div class="content">
                     <i class='bx bx-help-circle' ></i>
                   <p>Help</p>
                 </div>
               </span>
 
-              <span>
+              <span data-action="reset">
                 <div class="content">
                     <i class='bx bxs-trash-alt' ></i>
                   <p>Reset The Canvas</p>
                 </div>
               </span>
 
-              <hr> 
+              <hr>
 
-              <span>
+              <span data-action="github">
                 <div class="content special">
                     <i class='bx bxl-github' ></i>
                   <p>GitHub</p>
                 </div>
               </span>
 
-              <span>
+              <span data-action="blog">
                 <div class="content">
                     <i class='bx bxs-book-open' ></i>
                   <p>LixBlogs</p>
                 </div>
               </span>
 
-              <span>
+              <span data-action="report">
                 <div class="content">
                     <i class='bx bxs-bug-alt' ></i>
                   <p>Report An Issue</p>
                 </div>
               </span>
 
-              <span>
+              <span data-action="follow">
                 <div class="content">
                     <i class='bx bxl-instagram-alt' ></i>
                   <p>Follow Us</p>
                 </div>
               </span>
 
-              <hr> 
+              <hr>
 
               <span class="settings">
                 <div class="content">
@@ -555,7 +555,7 @@
                 </div>
               </span>
 
-              <span class="settings"> 
+              <span class="settings">
                 <div class="content canvasColor">
                     <p> Canvas Background Color </p>
                     <div class="backgroundColors">

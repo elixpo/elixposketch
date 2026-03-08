@@ -83,10 +83,152 @@ document.addEventListener("click", function(event) {
 
   if (menuIcon.contains(event.target)) {
     menu.classList.toggle("hidden");
-  } else {
+  } else if (!menu.contains(event.target)) {
     menu.classList.add("hidden");
   }
 });
+
+// --- Menu item action handlers ---
+document.addEventListener("DOMContentLoaded", function() {
+  const menu = document.querySelector(".menu");
+  if (!menu) return;
+
+  menu.addEventListener("click", function(e) {
+    const item = e.target.closest("span[data-action]");
+    if (!item) return;
+
+    const action = item.dataset.action;
+    menu.classList.add("hidden");
+
+    switch (action) {
+      case "shortcuts":
+        toggleShortcutsModal();
+        break;
+
+      case "reset":
+        if (confirm("Are you sure you want to reset the canvas? All shapes will be deleted.")) {
+          // Remove all shape elements from SVG
+          if (typeof shapes !== 'undefined') {
+            shapes.forEach(shape => {
+              if (shape.group && shape.group.parentNode) {
+                shape.group.parentNode.removeChild(shape.group);
+              }
+            });
+            shapes.length = 0;
+          }
+          if (typeof history !== 'undefined') history.length = 0;
+          if (typeof redoStack !== 'undefined') redoStack.length = 0;
+          if (typeof clearAllSelections === 'function') clearAllSelections();
+          if (typeof updateUndoRedoButtons === 'function') updateUndoRedoButtons();
+          currentShape = null;
+        }
+        break;
+
+      case "export":
+        exportCanvasAsImage();
+        break;
+
+      case "save":
+        saveCanvasAsSVG();
+        break;
+
+      case "github":
+        window.open("https://github.com/iamSt3el/LixSketch", "_blank");
+        break;
+
+      case "help":
+        toggleShortcutsModal();
+        break;
+
+      case "find":
+        // Placeholder — no find implementation yet
+        break;
+
+      case "open":
+        // Placeholder — no open implementation yet
+        break;
+
+      case "blog":
+        // Placeholder
+        break;
+
+      case "report":
+        window.open("https://github.com/iamSt3el/LixSketch/issues", "_blank");
+        break;
+
+      case "follow":
+        // Placeholder
+        break;
+    }
+  });
+
+  // --- Theme toggle ---
+  const themeIcons = menu.querySelectorAll(".themeControlIcons");
+  themeIcons.forEach(icon => {
+    icon.addEventListener("click", function(e) {
+      e.stopPropagation();
+      themeIcons.forEach(i => i.classList.remove("selected"));
+      this.classList.add("selected");
+    });
+  });
+
+  // --- Canvas background color ---
+  const colorOptions = menu.querySelectorAll(".colorOptionsCanvas");
+  colorOptions.forEach(option => {
+    option.addEventListener("click", function(e) {
+      e.stopPropagation();
+      colorOptions.forEach(o => o.classList.remove("selected"));
+      this.classList.add("selected");
+      const color = this.dataset.id;
+      svg.style.background = color;
+    });
+  });
+
+  // --- Ctrl+/ button in header ---
+  const ctrlSlashBtn = document.querySelector(".outsourceBtns.shareBtn:last-of-type");
+  if (ctrlSlashBtn && ctrlSlashBtn.textContent.trim() === "Ctrl + /") {
+    ctrlSlashBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      toggleShortcutsModal();
+    });
+  }
+});
+
+// --- Export canvas as PNG ---
+function exportCanvasAsImage() {
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement("canvas");
+    canvas.width = svg.viewBox.baseVal.width || svg.clientWidth;
+    canvas.height = svg.viewBox.baseVal.height || svg.clientHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = svg.style.background || "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+
+    const link = document.createElement("a");
+    link.download = (document.getElementById("workspaceNameInput").value || "LixSketch") + ".png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+  img.src = url;
+}
+
+// --- Save canvas as SVG ---
+function saveCanvasAsSVG() {
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+  const link = document.createElement("a");
+  link.download = (document.getElementById("workspaceNameInput").value || "LixSketch") + ".svg";
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
 
 
 function toolExtraPopup() {

@@ -1,9 +1,9 @@
-.menu 
+.menu
 {
     position: absolute;
     top: 56px;
-    left: 16px;
-    height: 80%;
+    right: 16px;
+    height: calc(100vh - 40px);
     width: 250px;
     background: #232329bd;
     backdrop-filter: blur(10px);
@@ -11,11 +11,11 @@
     align-items: center;
     justify-content: center;
     flex-wrap: nowrap;
-    max-height: 75%;
+    max-height: 80%;
     overflow-x: hidden;
     overflow-y: auto;
     transition: 0.25s;
-    transform-origin: top left;
+    transform-origin: top right;
     z-index: 1000;
     filter: blur(0px);
 }
