@@ -482,11 +482,11 @@ strokeRoughnesses.forEach(span => {
     });
 });
 
-document.getElementById("strokeOpacity").addEventListener("mousedown", (event) => {
+document.getElementById("strokeOpacity")?.addEventListener("mousedown", (event) => {
     isdraggingOpacity = true;
 });
 
-document.getElementById("strokeOpacity").addEventListener("mousemove", (event) => {
+document.getElementById("strokeOpacity")?.addEventListener("mousemove", (event) => {
     if(isdraggingOpacity) 
     {
         const slider = document.getElementById("strokeOpacity");
@@ -506,7 +506,7 @@ document.getElementById("strokeOpacity").addEventListener("mousemove", (event) =
     }
 });
 
-document.getElementById("strokeOpacity").addEventListener("mouseup", (event) => {
+document.getElementById("strokeOpacity")?.addEventListener("mouseup", (event) => {
     isdraggingOpacity = false;
 });
 

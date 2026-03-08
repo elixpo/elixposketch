@@ -2,14 +2,15 @@
 /**
  * SketchEngine - Main engine entry point
  *
- * Initializes the SVG canvas, sets up global state, imports all tool and shape modules,
- * and attaches event listeners. This is the single entry point for the sketch canvas.
+ * Initializes the SVG canvas, sets up global state (including RoughJS from npm),
+ * then dynamically imports all tool and shape modules.
  *
- * Usage:
- *   const engine = new SketchEngine(document.getElementById('freehand-canvas'));
- *   // later...
- *   engine.cleanup();
+ * IMPORTANT: All globals must be set BEFORE importing modules, because many
+ * modules run code at the top level (e.g. `const rc = rough.svg(svg)`) that
+ * depends on these globals existing.
  */
+
+import rough from 'roughjs';
 
 class SketchEngine {
     constructor(svgElement, options = {}) {
@@ -25,42 +26,28 @@ class SketchEngine {
             ...options
         };
 
-        // Initialize global state on window for backward compatibility
-        this._initGlobals();
-
-        // Module references (populated after dynamic import)
         this._modules = {};
         this._initialized = false;
     }
 
     /**
      * Set up all the global variables that the tool/shape modules depend on.
-     * These are set on `window` so existing code that references bare globals works.
+     * Must be called BEFORE any module imports.
      */
     _initGlobals() {
         // Core SVG reference
         window.svg = this.svg;
+        window.freehandCanvas = this.svg;
 
-        // RoughJS instance
-        if (window.rough) {
-            window.roughCanvas = window.rough.svg(this.svg);
-            window.roughGenerator = window.roughCanvas.generator;
-        }
+        // RoughJS from npm
+        window.rough = rough;
+        window.roughCanvas = rough.svg(this.svg);
+        window.roughGenerator = window.roughCanvas.generator;
 
         // Shape storage
-        if (!window.shapes) {
-            window.shapes = [];
-        }
-
-        // Current shape being drawn/selected
-        if (typeof window.currentShape === 'undefined') {
-            window.currentShape = null;
-        }
-
-        // Mouse position tracking
-        if (typeof window.lastMousePos === 'undefined') {
-            window.lastMousePos = null;
-        }
+        window.shapes = window.shapes || [];
+        window.currentShape = window.currentShape || null;
+        window.lastMousePos = window.lastMousePos || null;
 
         // Zoom state
         window.currentZoom = this.options.initialZoom;
@@ -70,14 +57,11 @@ class SketchEngine {
         window.maxZoom = this.options.maxZoom;
 
         // ViewBox state
-        if (!window.currentViewBox) {
-            window.currentViewBox = {
-                x: 0,
-                y: 0,
-                width: window.innerWidth,
-                height: window.innerHeight
-            };
-        }
+        window.currentViewBox = window.currentViewBox || {
+            x: 0, y: 0,
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
 
         // Tool activation flags
         window.isPaintToolActive = false;
@@ -89,7 +73,7 @@ class SketchEngine {
         window.isImageToolActive = false;
         window.isArrowToolActive = false;
         window.isLineToolActive = false;
-        window.isSelectionToolActive = false;
+        window.isSelectionToolActive = true;
         window.isPanningToolActive = false;
         window.isFrameToolActive = false;
         window.isIconToolActive = false;
@@ -112,24 +96,42 @@ class SketchEngine {
         window.ACTION_MODIFY = 'modify';
         window.ACTION_PASTE = 'paste';
 
-        // History stacks (for eraser-style undo)
-        if (!window.history) {
-            window.history = [];
-        }
-        if (!window.redoStack) {
-            window.redoStack = [];
-        }
+        // History stacks
+        window.historyStack = window.historyStack || [];
+        window.redoStack = window.redoStack || [];
+
+        // Sidebar element stubs — React sidebars handle UI, but legacy code
+        // queries these at top level. Provide dummy elements so it doesn't crash.
+        const dummyEl = document.createElement('div');
+        dummyEl.classList.add('hidden');
+        window.paintBrushSideBar = document.getElementById('paintBrushToolBar') || dummyEl;
+        window.lineSideBar = document.getElementById('lineSideBar') || dummyEl;
+        window.squareSideBar = document.getElementById('squareSideBar') || dummyEl;
+        window.circleSideBar = document.getElementById('circleSideBar') || dummyEl;
+        window.arrowSideBar = document.getElementById('arrowSideBar') || dummyEl;
+        window.textSideBar = document.getElementById('textToolBar') || dummyEl;
+        window.frameSideBar = document.getElementById('frameSideBar') || dummyEl;
+
+        // Zoom control element refs
+        window.zoomInBtn = document.getElementById('zoomIn') || dummyEl;
+        window.zoomOutBtn = document.getElementById('zoomOut') || dummyEl;
+        window.zoomPercentSpan = document.getElementById('zoomPercent') || dummyEl;
+
+        // Container
+        window.container = document.querySelector('.container') || document.body;
     }
 
     /**
-     * Dynamically import all shape and tool modules.
-     * Returns a promise that resolves when all modules are loaded.
+     * Initialize engine: set globals first, then import modules.
      */
     async init() {
         if (this._initialized) return;
 
+        // CRITICAL: Set up ALL globals BEFORE importing modules
+        this._initGlobals();
+
         try {
-            // Import shape classes
+            // Import shape classes first
             const [
                 { Rectangle },
                 { Circle },
@@ -154,7 +156,7 @@ class SketchEngine {
                 import('./shapes/FreehandStroke.js')
             ]);
 
-            // Expose shape classes globally for backward compat
+            // Expose shape classes globally
             window.Rectangle = Rectangle;
             window.Circle = Circle;
             window.Arrow = Arrow;
@@ -172,18 +174,11 @@ class SketchEngine {
                 Frame, FreehandStroke
             };
 
-            // Import tool handlers
+            // Import tool handlers (they run top-level code that reads globals)
             const [
-                rectangleTool,
-                circleTool,
-                arrowTool,
-                lineTool,
-                textTool,
-                codeTool,
-                imageTool,
-                iconTool,
-                frameTool,
-                freehandTool
+                rectangleTool, circleTool, arrowTool, lineTool,
+                textTool, codeTool, imageTool, iconTool,
+                frameTool, freehandTool
             ] = await Promise.all([
                 import('./tools/rectangleTool.js'),
                 import('./tools/circleTool.js'),
@@ -203,16 +198,11 @@ class SketchEngine {
                 frameTool, freehandTool
             };
 
-            // Import core modules
+            // Import core modules (EventDispatcher attaches SVG listeners at top level)
             const [
-                eventDispatcher,
-                undoRedo,
-                selection,
-                zoomPan,
-                copyPaste,
-                eraserTrail,
-                resizeShapes,
-                resizeCode
+                eventDispatcher, undoRedo, selection,
+                zoomPan, copyPaste, eraserTrail,
+                resizeShapes, resizeCode
             ] = await Promise.all([
                 import('./core/EventDispatcher.js'),
                 import('./core/UndoRedo.js'),
@@ -236,6 +226,14 @@ class SketchEngine {
                 import('./tools/laserTool.js')
             ]);
 
+            // Expose key functions globally
+            if (undoRedo.undo) window.undo = undoRedo.undo;
+            if (undoRedo.redo) window.redo = undoRedo.redo;
+            if (undoRedo.pushCreateAction) window.pushCreateAction = undoRedo.pushCreateAction;
+            if (undoRedo.pushDeleteAction) window.pushDeleteAction = undoRedo.pushDeleteAction;
+            if (selection.multiSelection) window.multiSelection = selection.multiSelection;
+            if (selection.clearAllSelections) window.clearAllSelections = selection.clearAllSelections;
+
             this._initialized = true;
             console.log('[SketchEngine] Initialized successfully');
         } catch (err) {
@@ -245,43 +243,55 @@ class SketchEngine {
     }
 
     /**
-     * Get access to shape classes
+     * Sync tool flags from Zustand activeTool value.
      */
-    get shapes() {
-        return this._modules.shapes || {};
+    setActiveTool(toolName) {
+        window.isPaintToolActive = false;
+        window.isSquareToolActive = false;
+        window.isCircleToolActive = false;
+        window.isArrowToolActive = false;
+        window.isTextToolActive = false;
+        window.isLaserToolActive = false;
+        window.isLineToolActive = false;
+        window.isEraserToolActive = false;
+        window.isSelectionToolActive = false;
+        window.isImageToolActive = false;
+        window.isPanningToolActive = false;
+        window.isFrameToolActive = false;
+        window.isIconToolActive = false;
+        window.isCodeToolActive = false;
+
+        const flagMap = {
+            select: 'isSelectionToolActive',
+            pan: 'isPanningToolActive',
+            rectangle: 'isSquareToolActive',
+            circle: 'isCircleToolActive',
+            line: 'isLineToolActive',
+            arrow: 'isArrowToolActive',
+            freehand: 'isPaintToolActive',
+            text: 'isTextToolActive',
+            code: 'isCodeToolActive',
+            eraser: 'isEraserToolActive',
+            laser: 'isLaserToolActive',
+            image: 'isImageToolActive',
+            frame: 'isFrameToolActive',
+            icon: 'isIconToolActive',
+        };
+
+        const flag = flagMap[toolName];
+        if (flag) window[flag] = true;
+
+        if (toolName === 'text' && window.isTextInCodeMode) {
+            window.isCodeToolActive = true;
+        }
     }
 
-    /**
-     * Get access to tool handlers
-     */
-    get tools() {
-        return this._modules.tools || {};
-    }
-
-    /**
-     * Get access to core modules
-     */
-    get core() {
-        return this._modules.core || {};
-    }
-
-    /**
-     * Clean up event listeners and global state.
-     * Call this when unmounting/destroying the sketch canvas.
-     */
     cleanup() {
-        // Remove event listeners that were attached to the SVG
-        // Note: The individual modules attach their own listeners,
-        // so a full cleanup would require each module to expose a cleanup method.
-        // For now, we clear the global state.
-
         window.shapes = [];
         window.currentShape = null;
         window.lastMousePos = null;
-
         this._modules = {};
         this._initialized = false;
-
         console.log('[SketchEngine] Cleaned up');
     }
 }

@@ -1347,8 +1347,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Attach to buttons
-document.getElementById('undo').addEventListener('click', undo);
-document.getElementById('redo').addEventListener('click', redo);
+document.getElementById('undo')?.addEventListener('click', undo);
+document.getElementById('redo')?.addEventListener('click', redo);
 
 // Expose globally for plain scripts
 window.pushCreateAction = pushCreateAction;

@@ -28,7 +28,7 @@ let draggedShapeInitialFrameIcon = null;
 let hoveredFrameIcon = null;
 let _pendingDragChecker = null; // module-level ref so cancelDragPrep can remove it
 
-const iconSearchInput = document.getElementById('iconSearchInput');
+const iconSearchInput = document.getElementById('iconSearchInput') || document.createElement('input');
 let searchTimeout = null;
 
 
@@ -61,7 +61,7 @@ function wrapIconElement(element) {
     return iconShape;
 }
 
-document.getElementById("importIcon").addEventListener('click', () => {
+document.getElementById("importIcon")?.addEventListener('click', () => {
     
 
     const iconContainer = document.getElementById('iconsToolBar');

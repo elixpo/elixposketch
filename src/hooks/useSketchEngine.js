@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useRef } from 'react'
+import useSketchStore from '@/store/useSketchStore'
 
 /**
- * Hook that initializes the SketchEngine on the provided SVG element.
- * Must be called after the SVG is mounted in the DOM.
+ * Hook that initializes the SketchEngine on the provided SVG element
+ * and bridges Zustand activeTool changes to the engine's window flags.
  */
 export default function useSketchEngine(svgRef) {
   const engineRef = useRef(null)
@@ -22,6 +23,10 @@ export default function useSketchEngine(svgRef) {
         const engine = new SketchEngine(svgRef.current)
         await engine.init()
         engineRef.current = engine
+
+        // Sync current tool immediately after init
+        const currentTool = useSketchStore.getState().activeTool
+        engine.setActiveTool(currentTool)
       } catch (err) {
         console.error('[useSketchEngine] Failed to initialize:', err)
       }
@@ -37,6 +42,18 @@ export default function useSketchEngine(svgRef) {
       }
     }
   }, [svgRef])
+
+  // Subscribe to Zustand activeTool changes and bridge to engine
+  useEffect(() => {
+    const unsub = useSketchStore.subscribe(
+      (state, prevState) => {
+        if (state.activeTool !== prevState?.activeTool && engineRef.current) {
+          engineRef.current.setActiveTool(state.activeTool)
+        }
+      }
+    )
+    return unsub
+  }, [])
 
   return engineRef
 }

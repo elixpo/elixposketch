@@ -34,7 +34,7 @@ function wrapImageElement(element) {
     return imageShape;
 }
 
-document.getElementById("importImage").addEventListener('click', () => {
+document.getElementById("importImage")?.addEventListener('click', () => {
     console.log('Import image clicked');
     isImageToolActive = true;
     console.log('isImageToolActive set to:', isImageToolActive);
