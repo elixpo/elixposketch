@@ -49,7 +49,7 @@ export default function TextSidebar() {
       <Divider />
 
       {/* Font */}
-      <ToolbarButton icon="bx-font-family" tooltip="Font">
+      <ToolbarButton icon="bxs-font-family" tooltip="Font">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Font</p>
         <div className="flex flex-col gap-0.5">
           {FONTS.map((f) => (
@@ -66,7 +66,7 @@ export default function TextSidebar() {
       <Divider />
 
       {/* Size */}
-      <ToolbarButton icon="bx-font-size" tooltip="Size">
+      <ToolbarButton icon="bxs-chevrons-up" tooltip="Size">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Size</p>
         <div className="flex items-center gap-1">
           {['S', 'M', 'L', 'XL'].map((s) => (
@@ -80,7 +80,7 @@ export default function TextSidebar() {
       <Divider />
 
       {/* Code mode */}
-      <ToolbarButton icon="bx-code-alt" tooltip="Code mode">
+      <ToolbarButton icon="bxs-terminal" tooltip="Code mode">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Code</p>
         <div className="flex flex-col gap-2">
           <button onClick={() => setCodeMode(!codeMode)}

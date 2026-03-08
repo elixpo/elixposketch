@@ -75,7 +75,7 @@ export default function CircleSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-line-chart" tooltip="Stroke width">
+      <ToolbarButton icon="bxs-edit-alt" tooltip="Stroke width">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Width</p>
         <div className="flex items-center gap-1">
           {[1, 2, 4, 7].map((w) => (
@@ -90,7 +90,7 @@ export default function CircleSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-pulse" tooltip="Stroke style">
+      <ToolbarButton icon="bxs-minus-circle" tooltip="Stroke style">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Style</p>
         <div className="flex items-center gap-1">
           {[{ v: 'solid', d: '' }, { v: 'dashed', d: '6 4' }, { v: 'dotted', d: '2 3' }].map((s) => (
@@ -105,7 +105,7 @@ export default function CircleSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-brush" tooltip="Fill style">
+      <ToolbarButton icon="bxs-brush" tooltip="Fill style">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Fill</p>
         <div className="flex flex-col gap-0.5">
           {FILLS.map((f) => (

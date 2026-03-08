@@ -39,7 +39,7 @@ export default function PaintbrushSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-line-chart" tooltip="Stroke width">
+      <ToolbarButton icon="bxs-edit-alt" tooltip="Stroke width">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Width</p>
         <div className="flex items-center gap-1">
           {[1, 2, 4, 7].map((w) => (
@@ -54,7 +54,7 @@ export default function PaintbrushSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-pulse" tooltip="Stroke style">
+      <ToolbarButton icon="bxs-minus-circle" tooltip="Stroke style">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Style</p>
         <div className="flex items-center gap-1">
           {[{ v: 'solid', d: '' }, { v: 'dashed', d: '6 4' }, { v: 'dotted', d: '2 3' }].map((s) => (
@@ -69,13 +69,13 @@ export default function PaintbrushSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-pen" tooltip="Taper">
+      <ToolbarButton icon="bxs-pen" tooltip="Taper">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Taper</p>
         <div className="flex flex-col gap-0.5">
           {[
-            { v: 'uniform', i: 'bx-minus', l: 'Uniform' },
-            { v: 'pen', i: 'bx-pen', l: 'Pen' },
-            { v: 'brush', i: 'bx-brush', l: 'Brush' },
+            { v: 'uniform', i: 'bxs-minus-circle', l: 'Uniform' },
+            { v: 'pen', i: 'bxs-pen', l: 'Pen' },
+            { v: 'brush', i: 'bxs-brush', l: 'Brush' },
           ].map((t) => (
             <button key={t.v} onClick={() => setTaper(t.v)}
               className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] transition-all duration-100 ${taper === t.v ? 'bg-[#5B57D1] text-white' : 'text-[#aaa] hover:bg-white/[0.06]'}`}
@@ -88,13 +88,13 @@ export default function PaintbrushSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-shape-polygon" tooltip="Roughness">
+      <ToolbarButton icon="bxs-shape-polygon" tooltip="Roughness">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Roughness</p>
         <div className="flex flex-col gap-0.5">
           {[
-            { v: 'smooth', i: 'bx-water', l: 'Smooth' },
-            { v: 'medium', i: 'bx-wind', l: 'Medium' },
-            { v: 'rough', i: 'bx-scatter-chart', l: 'Rough' },
+            { v: 'smooth', i: 'bxs-droplet', l: 'Smooth' },
+            { v: 'medium', i: 'bxs-leaf', l: 'Medium' },
+            { v: 'rough', i: 'bxs-bolt', l: 'Rough' },
           ].map((r) => (
             <button key={r.v} onClick={() => setRoughness(r.v)}
               className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] transition-all duration-100 ${roughness === r.v ? 'bg-[#5B57D1] text-white' : 'text-[#aaa] hover:bg-white/[0.06]'}`}
@@ -107,7 +107,7 @@ export default function PaintbrushSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-sun" tooltip="Opacity">
+      <ToolbarButton icon="bxs-sun" tooltip="Opacity">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Opacity {Math.round(opacity * 100)}%</p>
         <input
           type="range" min="0" max="1" step="0.05" value={opacity}

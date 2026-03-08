@@ -10,7 +10,7 @@ export default function FrameSidebar() {
 
   return (
     <ShapeSidebar visible={activeTool === TOOLS.FRAME}>
-      <ToolbarButton icon="bx-rename" tooltip="Frame name">
+      <ToolbarButton icon="bxs-rename" tooltip="Frame name">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Name</p>
         <input
           type="text"
@@ -23,9 +23,9 @@ export default function FrameSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-expand" tooltip="Actions">
+      <ToolbarButton icon="bxs-expand" tooltip="Actions">
         <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[#aaa] text-[11px] hover:bg-white/[0.06] hover:text-white transition-all duration-100">
-          <i className="bx bx-expand text-sm" />
+          <i className="bx bxs-expand text-sm" />
           Resize to Fit
         </button>
       </ToolbarButton>

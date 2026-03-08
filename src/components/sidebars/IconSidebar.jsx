@@ -4,9 +4,9 @@ import useSketchStore, { TOOLS } from '@/store/useSketchStore'
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 const CATEGORIES = [
-  { value: null, label: 'All', icon: 'bx-grid-alt' },
-  { value: 'tech', label: 'Tech', icon: 'bx-chip' },
-  { value: 'devops', label: 'DevOps', icon: 'bx-server' },
+  { value: null, label: 'All', icon: 'bxs-grid-alt' },
+  { value: 'tech', label: 'Tech', icon: 'bxs-chip' },
+  { value: 'devops', label: 'DevOps', icon: 'bxs-server' },
 ]
 
 export default function IconSidebar() {
@@ -81,7 +81,7 @@ export default function IconSidebar() {
       {/* Search */}
       <div className="px-3 pt-3 pb-2">
         <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-xl px-2.5 py-1.5">
-          <i className="bx bx-search text-text-dim text-sm" />
+          <i className="bx bxs-search text-text-dim text-sm" />
           <input
             id="iconSearchInput"
             type="text"
@@ -93,7 +93,7 @@ export default function IconSidebar() {
           />
           {query && (
             <button onClick={() => setQuery('')} className="text-text-dim hover:text-text-muted">
-              <i className="bx bx-x text-sm" />
+              <i className="bx bxs-x-circle text-sm" />
             </button>
           )}
         </div>
@@ -121,7 +121,7 @@ export default function IconSidebar() {
       <div className="px-3 pb-3 max-h-[200px] overflow-y-auto scrollbar-hide" id="iconsContainer">
         {loading ? (
           <div className="flex items-center justify-center py-6 text-text-dim text-xs">
-            <i className="bx bx-loader-alt bx-spin text-lg mr-2" />
+            <i className="bx bxs-hourglass bx-spin text-lg mr-2" />
             Loading...
           </div>
         ) : icons.length === 0 ? (

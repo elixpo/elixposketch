@@ -38,7 +38,7 @@ export default function LineSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-line-chart" tooltip="Stroke width">
+      <ToolbarButton icon="bxs-edit-alt" tooltip="Stroke width">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Width</p>
         <div className="flex items-center gap-1">
           {[1, 2, 4, 7].map((w) => (
@@ -53,7 +53,7 @@ export default function LineSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-pulse" tooltip="Stroke style">
+      <ToolbarButton icon="bxs-minus-circle" tooltip="Stroke style">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Style</p>
         <div className="flex items-center gap-1">
           {[{ v: 'solid', d: '' }, { v: 'dashed', d: '6 4' }, { v: 'dotted', d: '2 3' }].map((s) => (
@@ -68,7 +68,7 @@ export default function LineSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-shape-polygon" tooltip="Sloppiness">
+      <ToolbarButton icon="bxs-shape-polygon" tooltip="Sloppiness">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Sloppiness</p>
         <div className="flex items-center gap-1">
           {[{ v: 0, l: '0' }, { v: 2, l: '2' }, { v: 4, l: '4' }].map((s) => (
@@ -81,10 +81,10 @@ export default function LineSidebar() {
 
       <Divider />
 
-      <ToolbarButton icon="bx-wind" tooltip="Edge">
+      <ToolbarButton icon="bxs-landscape" tooltip="Edge">
         <p className="text-[10px] text-[#888] uppercase tracking-wider mb-2">Edge</p>
         <div className="flex flex-col gap-0.5">
-          {[{ v: 'smooth', i: 'bx-water', l: 'Smooth' }, { v: 'rough', i: 'bx-scatter-chart', l: 'Rough' }].map((e) => (
+          {[{ v: 'smooth', i: 'bxs-droplet', l: 'Smooth' }, { v: 'rough', i: 'bxs-bolt', l: 'Rough' }].map((e) => (
             <button key={e.v} onClick={() => setEdge(e.v)}
               className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] transition-all duration-100 ${edge === e.v ? 'bg-[#5B57D1] text-white' : 'text-[#aaa] hover:bg-white/[0.06]'}`}
             >
