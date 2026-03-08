@@ -5,18 +5,17 @@
 
 .toolbar {
     position: absolute;
-    top: calc(48px + 10px);
+    top: 60pxl;
     left: 10px;
-    bottom: 70px;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    justify-content: center;
+    gap: 4px;
+    justify-content: flex-start;
     align-items: center;
     background: #232329;
-    width: 46px;
-    padding: 10px 0;
+    width: 42px;
+    padding: 6px 0;
     box-sizing: border-box;
     z-index: 1000;
     max-height: calc(100vh - 48px - 10px - 70px);
@@ -36,13 +35,13 @@
     background: #555;
 }
 .toolbar i {
-    font-size: 22px;
+    font-size: 18px;
     color: #ffffffad;
     margin: 0;
-    padding: 5px;
+    padding: 4px;
     cursor: pointer;
     transition: 0.2s;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .toolbar i:hover {
@@ -52,13 +51,13 @@
 }
 
 .toolbar ion-icon {
-    font-size: 22px;
+    font-size: 18px;
     color: #c873e4;
     margin: 0;
-    padding: 5px;
+    padding: 4px;
     cursor: pointer;
     transition: 0.2s;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .toolbar i.selected
