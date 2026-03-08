@@ -7,11 +7,11 @@ import useSketchStore from '@/store/useSketchStore'
  * Hook that initializes the SketchEngine on the provided SVG element
  * and bridges Zustand activeTool changes to the engine's window flags.
  */
-export default function useSketchEngine(svgRef) {
+export default function useSketchEngine(svgRef, ready = true) {
   const engineRef = useRef(null)
 
   useEffect(() => {
-    if (!svgRef.current) return
+    if (!ready || !svgRef.current) return
 
     let cancelled = false
 
@@ -41,7 +41,7 @@ export default function useSketchEngine(svgRef) {
         engineRef.current = null
       }
     }
-  }, [svgRef])
+  }, [svgRef, ready])
 
   // Subscribe to Zustand activeTool changes and bridge to engine
   useEffect(() => {
