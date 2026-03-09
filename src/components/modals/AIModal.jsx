@@ -89,7 +89,7 @@ function DiagramPreview({ svgMarkup }) {
   return (
     <div
       ref={containerRef}
-      className="w-full h-[300px] rounded-xl bg-[#111] border border-white/[0.06] overflow-hidden cursor-grab active:cursor-grabbing relative select-none"
+      className="w-full h-[clamp(200px,40vh,400px)] rounded-xl bg-[#111] border border-white/[0.06] overflow-hidden cursor-grab active:cursor-grabbing relative select-none"
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -369,9 +369,10 @@ export default function AIModal() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
           <div
-            className={`relative bg-surface-card border border-border-light rounded-2xl p-8 mx-4 transition-all duration-300 ${
-              previewDiagram ? 'w-[720px]' : 'w-[580px]'
+            className={`relative bg-surface-card border border-border-light rounded-2xl p-5 sm:p-8 mx-3 sm:mx-4 max-h-[90vh] overflow-y-auto transition-all duration-300 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 ${
+              previewDiagram ? 'w-full max-w-[720px]' : 'w-full max-w-[580px]'
             }`}
+            style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -427,8 +428,8 @@ export default function AIModal() {
                       ? 'Describe a diagram...\n\ne.g. "User authentication flow with login, 2FA verification, and dashboard redirect"'
                       : 'Paste Mermaid syntax...\n\ngraph TD\n  A[Start] --> B{Decision}\n  B -->|Yes| C[Action]\n  B -->|No| D[End]'
                   }
-                  className={`w-full bg-surface-dark border border-border rounded-xl px-5 py-4 text-text-primary text-sm leading-relaxed resize-none focus:outline-none focus:border-accent-blue placeholder:text-text-dim ${
-                    mode === 'mermaid' && !isFrameEdit ? 'h-56 font-mono' : 'h-40'
+                  className={`w-full bg-surface-dark border border-border rounded-xl px-4 sm:px-5 py-3 sm:py-4 text-text-primary text-sm leading-relaxed resize-none focus:outline-none focus:border-accent-blue placeholder:text-text-dim ${
+                    mode === 'mermaid' && !isFrameEdit ? 'h-[clamp(140px,25vh,224px)] font-mono' : 'h-[clamp(100px,20vh,160px)]'
                   }`}
                   autoFocus
                   disabled={isGenerating}
