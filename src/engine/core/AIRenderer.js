@@ -7,9 +7,10 @@
  * 2. window.__mermaidRenderer(src) - direct algorithmic Mermaid parser
  *
  * All created shapes (nodes, labels, arrows) belong to a Frame.
- * Node labels are TextShape objects placed at the center of each node.
- * Edge labels are TextShape objects placed above the arrow midpoint.
- * Every shape is individually editable and selectable.
+ * Node labels are TextShape objects with data-type="text-group" for full
+ * interactivity (click-to-select, double-click-to-edit).
+ * Edge labels are TextShape objects placed near the arrow midpoint.
+ * All arrows are curved by default for clean non-overlapping routing.
  */
 
 const PADDING = 80;
@@ -194,7 +195,6 @@ export function renderAIDiagram(diagram) {
                 shape = new window.Rectangle(cx - sz / 2, cy - sz / 2, sz, sz, {
                     stroke: '#e0e0e0', strokeWidth: 1.5, fill: 'transparent', roughness: 1,
                 });
-                // Rotate the rough element 45deg around its center (local coords)
                 if (shape.element) {
                     shape.element.setAttribute('transform', `rotate(45, ${sz / 2}, ${sz / 2})`);
                 }
@@ -216,9 +216,9 @@ export function renderAIDiagram(diagram) {
 
         nodeMap.set(node.id, { shape, x: nx, y: ny, width: nw, height: nh, centerX: cx, centerY: cy });
 
-        // Node label — TextShape centered on the node, belongs to frame
+        // Node label as a proper interactive TextShape
         if (node.label) {
-            createLabel(node.label, cx, cy, 13, '#e0e0e0', frame);
+            createLabel(node.label, cx, cy, 14, '#e0e0e0', frame);
         }
     }
 
@@ -245,25 +245,27 @@ export function renderAIDiagram(diagram) {
         // Nudge slightly away from node boundaries
         const adx = ep.x - sp.x, ady = ep.y - sp.y;
         const alen = Math.sqrt(adx * adx + ady * ady) || 1;
-        const nudge = 4;
+        const nudge = 6;
         const spN = { x: sp.x + (adx / alen) * nudge, y: sp.y + (ady / alen) * nudge };
         const epN = { x: ep.x - (adx / alen) * nudge, y: ep.y - (ady / alen) * nudge };
 
         if (window.Arrow) {
             try {
-                // Use curved arrows when there are multiple edges from the same source
-                const useCurve = count > 1;
-                const curveAmount = useCurve ? 30 + (idx - (count - 1) / 2) * 25 : 0;
-
-                const arrowOpts = {
-                    stroke: '#e0e0e0', strokeWidth: 1.5, roughness: 1,
-                };
-                if (useCurve) {
-                    arrowOpts.arrowCurved = 'curved';
-                    arrowOpts.arrowCurveAmount = curveAmount;
+                // All arrows curved by default for clean diagram routing
+                // Fan-out > 1: spread curve amounts so arrows diverge
+                // Single edge: gentle curve to look professional
+                let curveAmount;
+                if (count > 1) {
+                    curveAmount = 40 + (idx - (count - 1) / 2) * 35;
+                } else {
+                    curveAmount = 30; // gentle default curve
                 }
 
-                const arrow = new window.Arrow(spN, epN, arrowOpts);
+                const arrow = new window.Arrow(spN, epN, {
+                    stroke: '#e0e0e0', strokeWidth: 1.5, roughness: 1,
+                    arrowCurved: 'curved',
+                    arrowCurveAmount: curveAmount,
+                });
                 window.shapes.push(arrow);
                 if (window.pushCreateAction) window.pushCreateAction(arrow);
                 if (frame.addShapeToFrame) frame.addShapeToFrame(arrow);
@@ -272,7 +274,7 @@ export function renderAIDiagram(diagram) {
             }
         }
 
-        // Edge label — offset perpendicular to the arrow for readability
+        // Edge label near arrow midpoint
         if (edge.label) {
             const mx = (spN.x + epN.x) / 2;
             const my = (spN.y + epN.y) / 2 - 18;
@@ -294,8 +296,9 @@ export function renderAIDiagram(diagram) {
 // ============================================================
 
 /**
- * Create a TextShape label at (x, y) and add it to the frame.
- * Each label is a proper shape — selectable, editable, moves with the frame.
+ * Create an interactive TextShape label at (x, y) and add it to the frame.
+ * Sets data-type="text-group" so the text tool recognizes it for
+ * click-to-select and double-click-to-edit.
  */
 function createLabel(text, x, y, fontSize, fill, frame) {
     const svg = window.svg;
@@ -303,15 +306,24 @@ function createLabel(text, x, y, fontSize, fill, frame) {
 
     try {
         const g = document.createElementNS(NS, 'g');
+        g.setAttribute('data-type', 'text-group');
+        g.setAttribute('transform', `translate(${x}, ${y})`);
+        g.setAttribute('data-x', x);
+        g.setAttribute('data-y', y);
+
         const t = document.createElementNS(NS, 'text');
-        t.setAttribute('x', x);
-        t.setAttribute('y', y);
+        t.setAttribute('x', 0);
+        t.setAttribute('y', 0);
         t.setAttribute('text-anchor', 'middle');
         t.setAttribute('dominant-baseline', 'central');
         t.setAttribute('fill', fill);
         t.setAttribute('font-size', fontSize);
         t.setAttribute('font-family', 'lixFont, sans-serif');
+        t.setAttribute('data-initial-font', 'lixFont');
+        t.setAttribute('data-initial-color', fill);
+        t.setAttribute('data-initial-size', fontSize + 'px');
         t.textContent = text;
+
         g.appendChild(t);
         svg.appendChild(g);
 
@@ -340,16 +352,14 @@ function getSpreadEdgePoint(node, targetNode, count, idx) {
 
     // Spread ratio: distribute along 60% of the edge length
     const spread = 0.6;
-    const t = count === 1 ? 0.5 : idx / (count - 1); // 0..1
+    const t = count === 1 ? 0.5 : idx / (count - 1);
     const offset = (t - 0.5) * spread;
 
     if (Math.abs(dx) < 0.001 || Math.abs(dy) * hw > Math.abs(dx) * hh) {
-        // Exiting top or bottom — spread along X
         const px = node.centerX + offset * node.width;
         const py = dy > 0 ? node.y + node.height : node.y;
         return { x: px, y: py };
     }
-    // Exiting left or right — spread along Y
     const px = dx > 0 ? node.x + node.width : node.x;
     const py = node.centerY + offset * node.height;
     return { x: px, y: py };
@@ -365,16 +375,12 @@ function getEdgePoint(node, targetNode) {
     const hw = node.width / 2;
     const hh = node.height / 2;
 
-    // Compare slope to decide horizontal vs vertical exit
-    // abs(dy)/abs(dx) > hh/hw  → exit top or bottom
     if (Math.abs(dx) < 0.001 || Math.abs(dy) * hw > Math.abs(dx) * hh) {
-        // Exit from top or bottom
-        if (dy > 0) return { x: node.centerX, y: node.y + node.height }; // bottom
-        return { x: node.centerX, y: node.y }; // top
+        if (dy > 0) return { x: node.centerX, y: node.y + node.height };
+        return { x: node.centerX, y: node.y };
     }
-    // Exit from left or right
-    if (dx > 0) return { x: node.x + node.width, y: node.centerY }; // right
-    return { x: node.x, y: node.centerY }; // left
+    if (dx > 0) return { x: node.x + node.width, y: node.centerY };
+    return { x: node.x, y: node.centerY };
 }
 
 export function initAIRenderer() {
