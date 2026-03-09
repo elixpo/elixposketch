@@ -223,25 +223,47 @@ export function renderAIDiagram(diagram) {
     }
 
     // --- EDGES ---
+    // Pre-compute fan-out counts per source node so we can spread arrows
+    const fanOut = new Map();
+    const fanIdx = new Map();
+    edges.forEach(e => {
+        fanOut.set(e.from, (fanOut.get(e.from) || 0) + 1);
+        fanIdx.set(e, fanOut.get(e.from) - 1);
+    });
+
     for (const edge of edges) {
         const from = nodeMap.get(edge.from), to = nodeMap.get(edge.to);
         if (!from || !to) continue;
 
-        const spRaw = getEdgePoint(from, to);
-        const epRaw = getEdgePoint(to, from);
+        const count = fanOut.get(edge.from) || 1;
+        const idx = fanIdx.get(edge);
 
-        // Nudge start/end points slightly away from node boundary for cleaner arrows
-        const adx = epRaw.x - spRaw.x, ady = epRaw.y - spRaw.y;
+        // Spread connection ports along the exit edge when fan-out > 1
+        const sp = getSpreadEdgePoint(from, to, count, idx);
+        const ep = getEdgePoint(to, from);
+
+        // Nudge slightly away from node boundaries
+        const adx = ep.x - sp.x, ady = ep.y - sp.y;
         const alen = Math.sqrt(adx * adx + ady * ady) || 1;
         const nudge = 4;
-        const sp = { x: spRaw.x + (adx / alen) * nudge, y: spRaw.y + (ady / alen) * nudge };
-        const ep = { x: epRaw.x - (adx / alen) * nudge, y: epRaw.y - (ady / alen) * nudge };
+        const spN = { x: sp.x + (adx / alen) * nudge, y: sp.y + (ady / alen) * nudge };
+        const epN = { x: ep.x - (adx / alen) * nudge, y: ep.y - (ady / alen) * nudge };
 
         if (window.Arrow) {
             try {
-                const arrow = new window.Arrow(sp, ep, {
+                // Use curved arrows when there are multiple edges from the same source
+                const useCurve = count > 1;
+                const curveAmount = useCurve ? 30 + (idx - (count - 1) / 2) * 25 : 0;
+
+                const arrowOpts = {
                     stroke: '#e0e0e0', strokeWidth: 1.5, roughness: 1,
-                });
+                };
+                if (useCurve) {
+                    arrowOpts.arrowCurved = 'curved';
+                    arrowOpts.arrowCurveAmount = curveAmount;
+                }
+
+                const arrow = new window.Arrow(spN, epN, arrowOpts);
                 window.shapes.push(arrow);
                 if (window.pushCreateAction) window.pushCreateAction(arrow);
                 if (frame.addShapeToFrame) frame.addShapeToFrame(arrow);
@@ -250,10 +272,10 @@ export function renderAIDiagram(diagram) {
             }
         }
 
-        // Edge label — above arrow midpoint
+        // Edge label — offset perpendicular to the arrow for readability
         if (edge.label) {
-            const mx = (sp.x + ep.x) / 2;
-            const my = (sp.y + ep.y) / 2 - 18;
+            const mx = (spN.x + epN.x) / 2;
+            const my = (spN.y + epN.y) / 2 - 18;
             createLabel(edge.label, mx, my, 11, '#a0a0b0', frame);
         }
     }
@@ -302,6 +324,35 @@ function createLabel(text, x, y, fontSize, fill, frame) {
         console.warn('[AIRenderer] Label creation failed:', err);
         return null;
     }
+}
+
+/**
+ * Like getEdgePoint but spreads multiple connections along the exit edge.
+ * count = total edges leaving this side, idx = 0-based index of this edge.
+ */
+function getSpreadEdgePoint(node, targetNode, count, idx) {
+    if (count <= 1) return getEdgePoint(node, targetNode);
+
+    const dx = targetNode.centerX - node.centerX;
+    const dy = targetNode.centerY - node.centerY;
+    const hw = node.width / 2;
+    const hh = node.height / 2;
+
+    // Spread ratio: distribute along 60% of the edge length
+    const spread = 0.6;
+    const t = count === 1 ? 0.5 : idx / (count - 1); // 0..1
+    const offset = (t - 0.5) * spread;
+
+    if (Math.abs(dx) < 0.001 || Math.abs(dy) * hw > Math.abs(dx) * hh) {
+        // Exiting top or bottom — spread along X
+        const px = node.centerX + offset * node.width;
+        const py = dy > 0 ? node.y + node.height : node.y;
+        return { x: px, y: py };
+    }
+    // Exiting left or right — spread along Y
+    const px = dx > 0 ? node.x + node.width : node.x;
+    const py = node.centerY + offset * node.height;
+    return { x: px, y: py };
 }
 
 /**

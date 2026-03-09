@@ -2,12 +2,22 @@
 
 import useSketchStore, { TOOLS } from '@/store/useSketchStore'
 import ShapeSidebar, { ToolbarButton, Divider } from './ShapeSidebar'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 export default function FrameSidebar() {
   const activeTool = useSketchStore((s) => s.activeTool)
   const selectedShapeSidebar = useSketchStore((s) => s.selectedShapeSidebar)
   const [frameName, setFrameName] = useState('Frame 1')
+
+  // Sync name from the actual selected frame when sidebar opens
+  useEffect(() => {
+    if (selectedShapeSidebar === 'frame' || activeTool === TOOLS.FRAME) {
+      const shape = window.currentShape
+      if (shape && shape.shapeName === 'frame' && shape.frameName) {
+        setFrameName(shape.frameName)
+      }
+    }
+  }, [selectedShapeSidebar, activeTool])
 
   const updateName = useCallback((e) => {
     const name = e.target.value
