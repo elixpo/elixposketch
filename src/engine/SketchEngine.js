@@ -274,6 +274,14 @@ class SketchEngine {
             // Initialize centralized copy/paste system
             if (copyPaste.initCopyPaste) copyPaste.initCopyPaste();
 
+            // Initialize AI renderer bridge
+            const aiRenderer = await import('./core/AIRenderer.js');
+            if (aiRenderer.initAIRenderer) aiRenderer.initAIRenderer();
+
+            // Initialize scene serializer bridge
+            const sceneSerializer = await import('./core/SceneSerializer.js');
+            if (sceneSerializer.initSceneSerializer) sceneSerializer.initSceneSerializer();
+
             this._initialized = true;
             console.log('[SketchEngine] Initialized successfully');
         } catch (err) {
