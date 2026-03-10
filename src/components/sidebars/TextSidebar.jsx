@@ -91,22 +91,26 @@ export default function TextSidebar() {
         </div>
       </ToolbarButton>
 
-      <Divider />
+      {!codeMode && (
+        <>
+          <Divider />
 
-      {/* Font */}
-      <ToolbarButton icon="bxs-font-family" tooltip="Font">
-        <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Font</p>
-        <div className="flex flex-col gap-0.5">
-          {FONTS.map((f) => (
-            <button key={f.value} onClick={() => updateFont(f.value)}
-              className={`flex items-center px-2.5 py-1.5 rounded-lg text-xs transition-all duration-100 ${font === f.value ? 'bg-[#5B57D1] text-white' : 'text-text-secondary hover:bg-white/[0.06]'}`}
-              style={{ fontFamily: f.value }}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </ToolbarButton>
+          {/* Font */}
+          <ToolbarButton icon="bxs-font-family" tooltip="Font">
+            <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Font</p>
+            <div className="flex flex-col gap-0.5">
+              {FONTS.map((f) => (
+                <button key={f.value} onClick={() => updateFont(f.value)}
+                  className={`flex items-center px-2.5 py-1.5 rounded-lg text-xs transition-all duration-100 ${font === f.value ? 'bg-[#5B57D1] text-white' : 'text-text-secondary hover:bg-white/[0.06]'}`}
+                  style={{ fontFamily: f.value }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </ToolbarButton>
+        </>
+      )}
 
       <Divider />
 

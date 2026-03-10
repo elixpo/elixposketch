@@ -51,6 +51,14 @@ setTextReferences(selectedCodeBlock, updateCodeSelectionFeedback, svg);
 // Convert group element to our CodeShape class
 function wrapCodeElement(groupElement) {
     const codeShape = new CodeShape(groupElement);
+    // Double-click to edit code block (works with any tool)
+    groupElement.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        const codeElement = groupElement.querySelector('text');
+        if (codeElement) {
+            makeCodeEditable(codeElement, groupElement, e);
+        }
+    });
     return codeShape;
 }
 
@@ -204,10 +212,8 @@ function adjustCodeEditorSize(editor) {
 
 
 function makeCodeEditable(codeElement, groupElement, clickEvent = null) {
-    console.log("Making code editable");
 
     if (document.querySelector(".svg-code-editor")) {
-        console.log("Already editing another code block.");
         return;
     }
 
@@ -390,7 +396,6 @@ function makeCodeEditable(codeElement, groupElement, clickEvent = null) {
 
 function applySyntaxHighlightingImproved(editor) {
     if (!window.hljs) {
-        console.warn("Highlight.js not loaded");
         return;
     }
 
@@ -446,7 +451,6 @@ function applySyntaxHighlightingImproved(editor) {
             editor.setAttribute('data-language', result.language);
         }
     } catch (error) {
-        console.warn("Error in syntax highlighting:", error);
     } finally {
         // Always clear the highlighting flag
         if (editor.setHighlighting) {
@@ -501,12 +505,10 @@ function restoreCursorPositionImproved(editor, targetOffset) {
             selection.addRange(range);
         }
     } catch (error) {
-        console.warn("Could not restore cursor position:", error);
         // Final fallback: just focus the editor
         try {
             editor.focus();
         } catch (focusError) {
-            console.warn("Could not focus editor:", focusError);
         }
     }
 }
@@ -579,7 +581,6 @@ function extractTextFromCodeElement(codeElement) {
 function renderCodeFromEditor(input, codeElement, deleteIfEmpty = false) {
     const editorContainer = input.closest('.svg-code-container');
     if (!editorContainer || !document.body.contains(editorContainer)) {
-        console.warn("RenderCode called but editor container is already removed.");
         return;
     }
 
@@ -601,12 +602,10 @@ function renderCodeFromEditor(input, codeElement, deleteIfEmpty = false) {
     document.body.removeChild(editorContainer);
 
     if (!gElement || !codeElement) {
-        console.error("RenderCode cannot find original group or code element.");
         return;
     }
 
     if (!gElement.parentNode) {
-        console.warn("RenderCode: Group element no longer attached to SVG.");
         if (selectedCodeBlock === gElement) {
             deselectCodeBlock();
         }
@@ -734,7 +733,6 @@ function applySyntaxHighlightingToSVG(code, language) {
 
 function applySyntaxHighlighting(editor) {
     if (!window.hljs) {
-        console.warn("Highlight.js not loaded");
         return;
     }
 
@@ -761,7 +759,6 @@ function applySyntaxHighlighting(editor) {
     // Add detected language info (optional)
     if (result.language) {
         editor.setAttribute('data-language', result.language);
-        console.log(`Detected language: ${result.language}`);
     }
 }
 
@@ -799,14 +796,12 @@ function restoreCursorPosition(editor, position) {
             sel.addRange(range);
         }
     } catch (error) {
-        console.warn("Could not restore cursor position:", error);
     }
 }
 
 
 function renderCode(input, codeElement, deleteIfEmpty = false) {
     if (!input || !document.body.contains(input)) {
-         console.warn("RenderCode called but input textarea is already removed.");
          return;
     }
 
@@ -820,12 +815,10 @@ function renderCode(input, codeElement, deleteIfEmpty = false) {
     document.body.removeChild(input);
 
     if (!gElement || !codeElement) {
-        console.error("RenderCode cannot find original group or code element.");
         return;
     }
 
     if (!gElement.parentNode) {
-        console.warn("RenderCode: Group element no longer attached to SVG.");
         if (selectedCodeBlock === gElement) {
              deselectCodeBlock();
         }
@@ -988,7 +981,6 @@ function createCodeSelectionFeedback(groupElement) {
 
     const backgroundRect = groupElement.querySelector('.code-background');
     if (!backgroundRect) {
-         console.warn("Cannot create selection feedback: background rect not found in group.");
          return;
     }
 
@@ -1115,7 +1107,6 @@ function updateCodeSelectionFeedback() {
     if (wasHidden) selectedCodeBlock.style.display = 'none';
 
     if (bbox.width === 0 && bbox.height === 0 && codeElement.textContent.trim() !== "") {
-        console.warn("BBox calculation resulted in zero dimensions. Feedback may be incorrect.");
     }
 
     const padding = 8;
@@ -1311,7 +1302,6 @@ function startCodeResize(event, anchor) {
     
     const codeElement = selectedCodeBlock.querySelector('text');
     if (!codeElement) {
-        console.error("Cannot start resize: code element not found.");
         isCodeResizing = false;
         return;
     }
@@ -1646,7 +1636,6 @@ const handleCodeMouseUp = (event) => {
 
             selectedCodeBlock.setAttribute("data-x", finalTranslateX);
             selectedCodeBlock.setAttribute("data-y", finalTranslateY);
-            console.log("Code Drag End - Final Pos:", finalTranslateX, finalTranslateY);
         }
 
         draggedCodeInitialFrame = null;
@@ -1684,7 +1673,6 @@ const handleCodeMouseUp = (event) => {
 
                 selectedCodeBlock.setAttribute("data-x", finalTranslateX);
                 selectedCodeBlock.setAttribute("data-y", finalTranslateY);
-                console.log("Code Resize End - Final Font Size:", finalFontSize);
             }
 
             clearTimeout(selectedCodeBlock.updateFeedbackTimeout);
@@ -1716,7 +1704,6 @@ const handleCodeMouseUp = (event) => {
                 );
             }
 
-            console.log("Code Rotation End");
         }
         updateCodeSelectionFeedback();
     }
@@ -1823,16 +1810,13 @@ const handleCodeMouseDown = function (e) {
             const codeElement = targetGroup.querySelector('text');
 
             if (codeElement && (e.target.tagName === "text" || e.target.tagName === "tspan")) {
-                console.log("Editing existing code. Group:", targetGroup);
                 makeCodeEditable(codeElement, targetGroup, e); // Pass click event for position
                 e.stopPropagation();
             } else {
-                 console.warn("Could not find code element for editing, creating new code block instead.");
                  deselectCodeBlock();
                  addCodeBlock(e);
             }
         } else {
-             console.log("Creating new code block.");
              deselectCodeBlock();
              addCodeBlock(e);
         }
@@ -1851,7 +1835,6 @@ codeTextColorOptions.forEach((span) => {
         const newColor = span.getAttribute("data-id");
         const oldColor = codeTextColor;
         codeTextColor = newColor;
-        console.log("Set Default Code Text Color:", codeTextColor);
 
         if (selectedCodeBlock) {
             const codeEditor = selectedCodeBlock.querySelector('.svg-code-editor');
@@ -1896,7 +1879,6 @@ codeTextFontOptions.forEach((span) => {
         const newFont = span.getAttribute("data-id");
         const oldFont = codeTextFont;
         codeTextFont = newFont;
-        console.log("Set Default Code Text Font:", codeTextFont);
 
         if (selectedCodeBlock) {
             const codeEditor = selectedCodeBlock.querySelector('.svg-code-editor');
@@ -1942,7 +1924,6 @@ codeTextSizeOptions.forEach((span) => {
         const newSize = span.getAttribute("data-id") + "px";
         const oldSize = codeTextSize;
         codeTextSize = newSize;
-        console.log("Set Default Code Text Size:", codeTextSize);
 
         if (selectedCodeBlock) {
             const codeEditor = selectedCodeBlock.querySelector('.svg-code-editor');
@@ -1989,7 +1970,6 @@ codeTextAlignOptions.forEach((span) => {
         const newAlign = span.getAttribute("data-id");
         const oldAlign = codeTextAlign;
         codeTextAlign = newAlign;
-        console.log("Set Default Code Text Align:", codeTextAlign);
 
         if (selectedCodeBlock) {
             const codeEditor = selectedCodeBlock.querySelector('.svg-code-editor');

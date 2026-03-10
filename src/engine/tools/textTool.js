@@ -168,10 +168,8 @@ function addText(event) {
 }
 
 function makeTextEditable(textElement, groupElement) {
-    console.log("Making text editable");
 
     if (document.querySelector("textarea.svg-text-editor")) {
-        console.log("Already editing.");
         return;
     }
 
@@ -337,7 +335,6 @@ function makeTextEditable(textElement, groupElement) {
 
 function renderText(input, textElement, deleteIfEmpty = false) {
     if (!input || !document.body.contains(input)) {
-         console.warn("RenderText called but input textarea is already removed.");
          return;
     }
 
@@ -351,12 +348,10 @@ function renderText(input, textElement, deleteIfEmpty = false) {
     document.body.removeChild(input);
 
     if (!gElement || !textElement) {
-        console.error("RenderText cannot find original group or text element.");
         return;
     }
 
     if (!gElement.parentNode) {
-        console.warn("RenderText: Group element no longer attached to SVG.");
         if (selectedElement === gElement) {
              deselectElement();
         }
@@ -433,7 +428,6 @@ function createSelectionFeedback(groupElement) {
 
     const textElement = groupElement.querySelector('text');
     if (!textElement) {
-         console.warn("Cannot create selection feedback: text element not found in group.");
          return;
     }
 
@@ -551,7 +545,6 @@ function updateSelectionFeedback() {
     if (wasHidden) selectedElement.style.display = 'none';
 
     if (bbox.width === 0 && bbox.height === 0 && textElement.textContent.trim() !== "") {
-        console.warn("BBox calculation resulted in zero dimensions. Feedback may be incorrect.");
     }
 
     const padding = 8;
@@ -751,7 +744,6 @@ function startResize(event, anchor) {
 
   const textElement = selectedElement.querySelector('text');
   if (!textElement) {
-       console.error("Cannot start resize: text element not found.");
        isResizing = false;
        return;
   }
@@ -1046,7 +1038,6 @@ const handleMouseUp = (event) => {
 
             selectedElement.setAttribute("data-x", finalTranslateX);
             selectedElement.setAttribute("data-y", finalTranslateY);
-            console.log("Drag End - Final Pos:", finalTranslateX, finalTranslateY);
         }
 
         draggedShapeInitialFrameText = null;
@@ -1084,7 +1075,6 @@ const handleMouseUp = (event) => {
 
                 selectedElement.setAttribute("data-x", finalTranslateX);
                 selectedElement.setAttribute("data-y", finalTranslateY);
-                console.log("Resize End - Final Font Size:", finalFontSize);
             }
 
             clearTimeout(selectedElement.updateFeedbackTimeout);
@@ -1116,7 +1106,6 @@ const handleMouseUp = (event) => {
                 );
             }
 
-            console.log("Rotation End");
         }
         updateSelectionFeedback();
     }
@@ -1315,7 +1304,6 @@ textColorOptions.forEach((span) => {
         const newColor = span.getAttribute("data-id");
         const oldColor = textColor;
         textColor = newColor;
-        console.log("Set Default Text Color:", textColor);
 
         if (selectedElement) {
             const textElement = selectedElement.querySelector('text');
@@ -1359,7 +1347,6 @@ textFontOptions.forEach((span) => {
         const newFont = span.getAttribute("data-id");
         const oldFont = textFont;
         textFont = newFont;
-        console.log("Set Default Text Font:", textFont);
 
         if (selectedElement) {
             const textElement = selectedElement.querySelector('text');
@@ -1404,7 +1391,6 @@ textSizeOptions.forEach((span) => {
         const newSize = span.getAttribute("data-id") + "px";
         const oldSize = textSize;
         textSize = newSize;
-        console.log("Set Default Text Size:", textSize);
 
         if (selectedElement) {
             const textElement = selectedElement.querySelector('text');
@@ -1449,7 +1435,6 @@ textAlignOptions.forEach((span) => {
         const newAlign = span.getAttribute("data-id");
         const oldAlign = textAlign;
         textAlign = newAlign;
-        console.log("Set Default Text Align:", textAlign);
 
         if (selectedElement) {
             const textElement = selectedElement.querySelector('text');
@@ -1801,7 +1786,11 @@ window.__convertTextToCode = function() {
     }
 };
 window.__convertCodeToText = function() {
-    const codeBlock = getSelectedCodeBlock();
+    // Try codeTool's selectedCodeBlock first, then check textTool's selectedElement
+    let codeBlock = getSelectedCodeBlock();
+    if (!codeBlock && selectedElement && selectedElement.getAttribute('data-type') === 'code-group') {
+        codeBlock = selectedElement;
+    }
     if (codeBlock) {
         convertCodeToText(codeBlock);
     }
