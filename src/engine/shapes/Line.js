@@ -1,6 +1,7 @@
 /* eslint-disable */
 // Line shape class - extracted from lineTool.js
 // Depends on globals: svg, shapes, rough, currentShape, currentZoom
+import { updateAttachedArrows as updateArrowsForShape } from '../tools/arrowTool.js';
 
 const rc = rough.svg(svg);
 const lineColor = "#fff";
