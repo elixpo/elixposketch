@@ -309,6 +309,11 @@ class SketchEngine {
             window.disableAllSideBars();
         }
 
+        // Force cleanup eraser trail when switching tools
+        if (typeof window.forceCleanupEraserTrail === 'function') {
+            window.forceCleanupEraserTrail();
+        }
+
         window.isPaintToolActive = false;
         window.isSquareToolActive = false;
         window.isCircleToolActive = false;
