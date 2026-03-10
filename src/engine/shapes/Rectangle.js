@@ -210,8 +210,8 @@ class Rectangle {
         input.setAttribute('contenteditable', 'true');
         input.style.cssText = `
             max-width: ${screenW - 8}px; min-width: 30px; min-height: 20px;
-            background: transparent; border: 1px solid rgba(91, 87, 209, 0.5);
-            border-radius: 3px; outline: none; padding: 2px 6px;
+            background: transparent; border: none;
+            outline: none; padding: 2px 6px;
             color: ${this.labelColor}; font-size: ${Math.max(12, this.labelFontSize * (screenW / Math.max(this.width, 1)))}px;
             font-family: lixFont, sans-serif; text-align: center;
             white-space: pre-wrap; word-break: break-word;

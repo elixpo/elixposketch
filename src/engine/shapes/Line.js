@@ -5,6 +5,7 @@
 const rc = rough.svg(svg);
 const lineColor = "#fff";
 const lineStrokeWidth = 2;
+let hoveredFrameLine = null;
 
 class Line {
     constructor(startPoint, endPoint, options = {}) {
@@ -215,9 +216,9 @@ class Line {
 
         const mid = this._getMidpoint();
         this.labelElement.setAttribute('x', mid.x);
-        this.labelElement.setAttribute('y', mid.y - 10); // Offset above the line
+        this.labelElement.setAttribute('y', mid.y);
         this.labelElement.setAttribute('text-anchor', 'middle');
-        this.labelElement.setAttribute('dominant-baseline', 'auto');
+        this.labelElement.setAttribute('dominant-baseline', 'central');
         this.labelElement.setAttribute('fill', this.labelColor);
         this.labelElement.setAttribute('font-size', this.labelFontSize);
         this.labelElement.setAttribute('font-family', 'lixFont, sans-serif');
@@ -254,14 +255,14 @@ class Line {
         const screenMid = pt.matrixTransform(ctm);
 
         const editW = 160;
-        const editH = 34;
+        const editH = 28;
 
-        // Create HTML overlay
+        // Create HTML overlay centered on the midpoint
         const overlay = document.createElement('div');
         overlay.className = 'shape-label-editor';
         overlay.style.cssText = `
             position: fixed; z-index: 10000;
-            left: ${screenMid.x - editW / 2}px; top: ${screenMid.y - editH - 4}px;
+            left: ${screenMid.x - editW / 2}px; top: ${screenMid.y - editH / 2}px;
             width: ${editW}px; height: ${editH}px;
             display: flex; align-items: center; justify-content: center;
             pointer-events: auto;
@@ -271,7 +272,7 @@ class Line {
         input.setAttribute('contenteditable', 'true');
         input.style.cssText = `
             width: 100%; height: 100%;
-            background: rgba(18,18,18,0.85); border: 1px solid #5B57D1; border-radius: 4px;
+            background: transparent; border: none;
             outline: none; padding: 2px 6px;
             color: ${this.labelColor}; font-size: ${this.labelFontSize}px;
             font-family: lixFont, sans-serif; text-align: center;
@@ -537,8 +538,20 @@ removeSelection() {
         this.updateLineElement();
         this.updateAnchorPositions();
 
-        // Only update frame containment if we're actively dragging the shape itself
-        if (isDraggingLine && !this.isBeingMovedByFrame) {
+        // Update hit area path
+        if (this._hitArea) {
+            if (this.isCurved && this.controlPoint) {
+                this._hitArea.setAttribute('d', `M ${this.startPoint.x} ${this.startPoint.y} Q ${this.controlPoint.x} ${this.controlPoint.y} ${this.endPoint.x} ${this.endPoint.y}`);
+            } else {
+                this._hitArea.setAttribute('d', `M ${this.startPoint.x} ${this.startPoint.y} L ${this.endPoint.x} ${this.endPoint.y}`);
+            }
+        }
+
+        // Update label position
+        this._updateLabelElement();
+
+        // Only update frame containment if not being moved by a parent frame
+        if (!this.isBeingMovedByFrame) {
             this.updateFrameContainment();
         }
 
@@ -563,7 +576,7 @@ removeSelection() {
         });
         
         // If we have a parent frame and we're being dragged, temporarily remove clipping
-        if (this.parentFrame && isDraggingLine) {
+        if (this.parentFrame) {
             this.parentFrame.temporarilyRemoveFromFrame(this);
         }
         

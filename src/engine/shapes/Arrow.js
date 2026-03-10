@@ -371,9 +371,9 @@ class Arrow {
 
         const mid = this._getMidpoint();
         this.labelElement.setAttribute('x', mid.x);
-        this.labelElement.setAttribute('y', mid.y - 10);
+        this.labelElement.setAttribute('y', mid.y);
         this.labelElement.setAttribute('text-anchor', 'middle');
-        this.labelElement.setAttribute('dominant-baseline', 'auto');
+        this.labelElement.setAttribute('dominant-baseline', 'central');
         this.labelElement.setAttribute('fill', this.labelColor);
         this.labelElement.setAttribute('font-size', this.labelFontSize);
         this.labelElement.setAttribute('font-family', 'lixFont, sans-serif');
@@ -410,14 +410,14 @@ class Arrow {
         const screenMid = pt.matrixTransform(ctm);
 
         const editW = 160;
-        const editH = 34;
+        const editH = 28;
 
-        // Create HTML overlay
+        // Create HTML overlay centered on the midpoint
         const overlay = document.createElement('div');
         overlay.className = 'shape-label-editor';
         overlay.style.cssText = `
             position: fixed; z-index: 10000;
-            left: ${screenMid.x - editW / 2}px; top: ${screenMid.y - editH - 4}px;
+            left: ${screenMid.x - editW / 2}px; top: ${screenMid.y - editH / 2}px;
             width: ${editW}px; height: ${editH}px;
             display: flex; align-items: center; justify-content: center;
             pointer-events: auto;
@@ -427,7 +427,7 @@ class Arrow {
         input.setAttribute('contenteditable', 'true');
         input.style.cssText = `
             width: 100%; height: 100%;
-            background: rgba(18,18,18,0.85); border: 1px solid #5B57D1; border-radius: 4px;
+            background: transparent; border: none;
             outline: none; padding: 2px 6px;
             color: ${this.labelColor}; font-size: ${this.labelFontSize}px;
             font-family: lixFont, sans-serif; text-align: center;
@@ -1414,6 +1414,8 @@ static getFrameAttachmentPoint(point, frame, tolerance = 20) {
     if (isDragging && !this.isBeingMovedByFrame) {
         this.updateFrameContainment();
     }
+
+    this.draw();
 }
 
 updateFrameContainment() {
