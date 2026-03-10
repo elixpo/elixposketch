@@ -474,18 +474,13 @@ removeSelection() {
 
     updatePosition(anchorIndex, newX, newY) {
         if (anchorIndex === 0) {
-            // Start point
             this.startPoint.x = newX;
             this.startPoint.y = newY;
-            // Don't auto-update control point to prevent jitter
         } else if (anchorIndex === 1) {
-            // End point
             this.endPoint.x = newX;
             this.endPoint.y = newY;
-            // Don't auto-update control point to prevent jitter
         } else if (anchorIndex === 2) {
             // Middle anchor - dragged position is ON the curve (bezier t=0.5)
-            // Compute control point: CP = 2*M - 0.5*(P0+P1)
             if (!this.isCurved) {
                 this.isCurved = true;
             }
@@ -495,22 +490,9 @@ removeSelection() {
                 y: 2 * newY - 0.5 * (this.startPoint.y + this.endPoint.y)
             };
         }
-        
-        // Redraw line, hit area, and label
-        this.updateLineElement();
-        this.updateAnchorPositions();
 
-        // Update hit area path
-        if (this._hitArea) {
-            if (this.isCurved && this.controlPoint) {
-                this._hitArea.setAttribute('d', `M ${this.startPoint.x} ${this.startPoint.y} Q ${this.controlPoint.x} ${this.controlPoint.y} ${this.endPoint.x} ${this.endPoint.y}`);
-            } else {
-                this._hitArea.setAttribute('d', `M ${this.startPoint.x} ${this.startPoint.y} L ${this.endPoint.x} ${this.endPoint.y}`);
-            }
-        }
-
-        // Update label position at new midpoint
-        this._updateLabelElement();
+        // Full redraw to keep anchors, hit area, and label in sync
+        this.draw();
     }
 
     updateLineElement() {
