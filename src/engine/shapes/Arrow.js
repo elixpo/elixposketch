@@ -57,6 +57,7 @@ class Arrow {
         this.labelColor = options.labelColor || '#e0e0e0';
         this.labelFontSize = options.labelFontSize || 12;
         this._isEditingLabel = false;
+        this._hitArea = null;
 
         // Initialize control points if curved
         if (this.arrowCurved === "curved" && !this.controlPoint1 && !this.controlPoint2) {
@@ -223,7 +224,7 @@ class Arrow {
         const childrenToRemove = [];
         for (let i = 0; i < this.group.children.length; i++) {
             const child = this.group.children[i];
-            if (child !== this.labelElement) {
+            if (child !== this.labelElement && child !== this._hitArea) {
                 childrenToRemove.push(child);
             }
         }
@@ -307,6 +308,28 @@ class Arrow {
         this.element = arrowPath;
         this.group.appendChild(this.element);
 
+        // Hit area - thicker invisible path for dblclick detection
+        {
+            let hitPathData;
+            if (this.arrowCurved === "curved" && this.controlPoint1 && this.controlPoint2) {
+                hitPathData = `M ${this.startPoint.x} ${this.startPoint.y} C ${this.controlPoint1.x} ${this.controlPoint1.y}, ${this.controlPoint2.x} ${this.controlPoint2.y}, ${this.endPoint.x} ${this.endPoint.y}`;
+            } else if (this.arrowCurved === "elbow") {
+                const ex = this.elbowX !== null ? this.elbowX : (this.startPoint.x + this.endPoint.x) / 2;
+                hitPathData = `M ${this.startPoint.x} ${this.startPoint.y} L ${ex} ${this.startPoint.y} L ${ex} ${this.endPoint.y} L ${this.endPoint.x} ${this.endPoint.y}`;
+            } else {
+                hitPathData = `M ${this.startPoint.x} ${this.startPoint.y} L ${this.endPoint.x} ${this.endPoint.y}`;
+            }
+            if (!this._hitArea) {
+                this._hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                this._hitArea.setAttribute('fill', 'none');
+                this._hitArea.setAttribute('stroke', 'transparent');
+                this._hitArea.setAttribute('stroke-width', '20');
+                this._hitArea.setAttribute('style', 'pointer-events: stroke;');
+                this.group.appendChild(this._hitArea);
+            }
+            this._hitArea.setAttribute('d', hitPathData);
+        }
+
         // Update embedded label at midpoint
         this._updateLabelElement();
 
@@ -377,30 +400,45 @@ class Arrow {
             this.labelElement.setAttribute('visibility', 'hidden');
         }
 
+        // Get midpoint in screen coords via CTM
         const mid = this._getMidpoint();
-        const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-        const editW = 140;
-        const editH = 30;
-        fo.setAttribute('x', mid.x - editW / 2);
-        fo.setAttribute('y', mid.y - editH - 4);
-        fo.setAttribute('width', editW);
-        fo.setAttribute('height', editH);
+        const ctm = this.group.getScreenCTM();
+        if (!ctm) { this._isEditingLabel = false; return; }
+
+        const pt = svg.createSVGPoint();
+        pt.x = mid.x; pt.y = mid.y;
+        const screenMid = pt.matrixTransform(ctm);
+
+        const editW = 160;
+        const editH = 34;
+
+        // Create HTML overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'shape-label-editor';
+        overlay.style.cssText = `
+            position: fixed; z-index: 10000;
+            left: ${screenMid.x - editW / 2}px; top: ${screenMid.y - editH - 4}px;
+            width: ${editW}px; height: ${editH}px;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: auto;
+        `;
 
         const input = document.createElement('div');
         input.setAttribute('contenteditable', 'true');
         input.style.cssText = `
             width: 100%; height: 100%;
             background: rgba(18,18,18,0.85); border: 1px solid #5B57D1; border-radius: 4px;
-            outline: none; color: ${this.labelColor}; font-size: ${this.labelFontSize}px;
+            outline: none; padding: 2px 6px;
+            color: ${this.labelColor}; font-size: ${this.labelFontSize}px;
             font-family: lixFont, sans-serif; text-align: center;
             display: flex; align-items: center; justify-content: center;
-            white-space: pre-wrap; word-break: break-word; padding: 2px 6px;
-            overflow: hidden; cursor: text;
+            white-space: pre-wrap; word-break: break-word;
+            cursor: text;
         `;
         input.textContent = this.label;
 
-        fo.appendChild(input);
-        this.group.appendChild(fo);
+        overlay.appendChild(input);
+        document.body.appendChild(overlay);
 
         setTimeout(() => {
             input.focus();
@@ -415,7 +453,7 @@ class Arrow {
             const newText = input.textContent.trim();
             this.label = newText;
             this._isEditingLabel = false;
-            if (fo.parentNode) fo.parentNode.removeChild(fo);
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
             if (this.labelElement) this.labelElement.setAttribute('visibility', 'visible');
             this.draw();
         };
