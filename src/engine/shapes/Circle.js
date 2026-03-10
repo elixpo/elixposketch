@@ -537,18 +537,23 @@ class Circle {
             pointer-events: auto;
         `;
 
+        const canvasBg = window.getComputedStyle(svg).backgroundColor || '#000';
         const input = document.createElement('div');
         input.setAttribute('contenteditable', 'true');
         input.style.cssText = `
             max-width: ${screenW - 8}px; min-width: 30px; min-height: 20px;
-            background: transparent; border: none;
+            background: ${canvasBg}; border: none;
             outline: none; padding: 2px 6px;
             color: ${this.labelColor}; font-size: ${Math.max(12, this.labelFontSize * (screenW / Math.max(this.rx * 2, 1)))}px;
             font-family: lixFont, sans-serif; text-align: center;
             white-space: pre-wrap; word-break: break-word;
             cursor: text;
         `;
-        input.textContent = this.label;
+        if (this.label) {
+            input.textContent = this.label;
+        } else {
+            input.innerHTML = '&nbsp;';
+        }
 
         overlay.appendChild(input);
         document.body.appendChild(overlay);
@@ -563,7 +568,7 @@ class Circle {
         }, 10);
 
         const finishEdit = () => {
-            const newText = input.textContent.trim();
+            const newText = input.textContent.trim().replace(/\u00A0/g, '');
             this.label = newText;
             this._isEditingLabel = false;
 
