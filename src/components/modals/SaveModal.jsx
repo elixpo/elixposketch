@@ -321,36 +321,6 @@ export default function SaveModal() {
             <p className="text-red-400 text-[10px] mt-2">{collabError}</p>
           )}
         </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 mb-3">
-          <div className="flex-1 h-px bg-border-light" />
-          <span className="text-text-dim text-xs">Export</span>
-          <div className="flex-1 h-px bg-border-light" />
-        </div>
-
-        {/* Save Options */}
-        <div className="flex flex-col gap-2">
-          {SAVE_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => handleSaveAction(option.id, toggleSaveModal)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border-light hover:border-accent-blue hover:bg-surface-hover cursor-pointer transition-all duration-200"
-            >
-              <i
-                className={`bx ${option.icon} text-2xl text-accent-blue`}
-              />
-              <div className="flex flex-col items-start">
-                <span className="text-text-primary text-sm">
-                  {option.label}
-                </span>
-                <span className="text-text-dim text-xs">
-                  {option.description}
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   )
