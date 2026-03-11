@@ -491,6 +491,61 @@ export function exportAsPNG() {
 }
 
 // ============================================================
+// COPY to clipboard as PNG
+// ============================================================
+export function copyAsPNG() {
+    const svgEl = window.svg;
+    if (!svgEl) return;
+
+    const clone = svgEl.cloneNode(true);
+    const selectionEls = clone.querySelectorAll('[data-selection], .selection-handle, .resize-handle, .rotation-handle');
+    selectionEls.forEach(el => el.remove());
+
+    const svgData = new XMLSerializer().serializeToString(clone);
+    const canvas = document.createElement('canvas');
+    const vb = svgEl.viewBox.baseVal;
+    canvas.width = vb.width * 2;
+    canvas.height = vb.height * 2;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(2, 2);
+
+    const img = new Image();
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+        ctx.fillStyle = '#121212';
+        ctx.fillRect(0, 0, vb.width, vb.height);
+        ctx.drawImage(img, 0, 0, vb.width, vb.height);
+        URL.revokeObjectURL(url);
+
+        canvas.toBlob(blob => {
+            if (!blob) return;
+            navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+            ]).catch(err => console.warn('[SceneSerializer] Clipboard write failed:', err));
+        }, 'image/png');
+    };
+    img.src = url;
+}
+
+// ============================================================
+// COPY to clipboard as SVG
+// ============================================================
+export function copyAsSVG() {
+    const svgEl = window.svg;
+    if (!svgEl) return;
+
+    const clone = svgEl.cloneNode(true);
+    const selectionEls = clone.querySelectorAll('[data-selection], .selection-handle, .resize-handle, .rotation-handle');
+    selectionEls.forEach(el => el.remove());
+
+    const svgData = new XMLSerializer().serializeToString(clone);
+    navigator.clipboard.writeText(svgData)
+        .catch(err => console.warn('[SceneSerializer] Clipboard write failed:', err));
+}
+
+// ============================================================
 // EXPORT as PDF (uses browser print)
 // ============================================================
 export function exportAsPDF() {
@@ -532,5 +587,7 @@ export function initSceneSerializer() {
         upload: uploadScene,
         exportPNG: exportAsPNG,
         exportPDF: exportAsPDF,
+        copyAsPNG,
+        copyAsSVG,
     };
 }

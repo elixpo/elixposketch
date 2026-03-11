@@ -14,15 +14,15 @@ const CANVAS_BACKGROUNDS = [
 const MENU_ITEMS = [
   { label: 'Open', shortcut: 'Ctrl+O', icon: 'bx-folder-open' },
   { label: 'Save As', shortcut: 'Ctrl+S', icon: 'bx-save', action: 'save' },
-  { label: 'Commands', shortcut: 'Ctrl+/', icon: 'bx-command' },
+  { label: 'Commands', shortcut: 'Ctrl+/', icon: 'bx-command', action: 'commands', highlight: true },
   { label: 'Find Text', shortcut: 'Ctrl+F', icon: 'bx-search' },
-  { label: 'Help', icon: 'bx-help-circle' },
+  { label: 'Help', icon: 'bx-help-circle', action: 'help' },
   { label: 'Reset The Canvas', icon: 'bx-reset', action: 'reset' },
 ]
 
 const LINKS = [
-  { label: 'GitHub', icon: 'bxl-github', href: '#' },
-  { label: 'Report An Issue', icon: 'bx-bug', href: '#' },
+  { label: 'GitHub', icon: 'bxl-github', href: 'https://github.com/elixpo/lixsketch' },
+  { label: 'Report An Issue', icon: 'bx-bug', href: 'https://github.com/elixpo/lixsketch/issues' },
 ]
 
 export default function AppMenu() {
@@ -38,6 +38,9 @@ export default function AppMenu() {
   const gridEnabled = useSketchStore((s) => s.gridEnabled)
   const toggleGrid = useSketchStore((s) => s.toggleGrid)
 
+  const toggleCommandPalette = useUIStore((s) => s.toggleCommandPalette)
+  const toggleHelpModal = useUIStore((s) => s.toggleHelpModal)
+
   const handleItemClick = (item) => {
     if (item.action === 'save') {
       toggleSaveModal()
@@ -45,6 +48,12 @@ export default function AppMenu() {
     } else if (item.action === 'reset') {
       clearShapes()
       clearHistory()
+      closeMenu()
+    } else if (item.action === 'commands') {
+      toggleCommandPalette()
+      closeMenu()
+    } else if (item.action === 'help') {
+      toggleHelpModal()
       closeMenu()
     }
   }
@@ -70,7 +79,11 @@ export default function AppMenu() {
         <button
           key={item.label}
           onClick={() => handleItemClick(item)}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+          className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all duration-200 ${
+            item.highlight
+              ? 'text-accent-blue bg-accent-blue/10 hover:bg-accent-blue/20'
+              : 'text-text-secondary hover:bg-surface-hover'
+          }`}
         >
           <span className="flex items-center gap-2">
             <i className={`bx ${item.icon} text-sm`} />
@@ -103,6 +116,8 @@ export default function AppMenu() {
         <a
           key={link.label}
           href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
         >
           <i className={`bx ${link.icon} text-sm`} />
