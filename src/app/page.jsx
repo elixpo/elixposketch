@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
+import LandingNav from '@/components/landing/LandingNav'
+import LandingFooter from '@/components/landing/LandingFooter'
 
 // Rough.js hand-drawn shape component (canvas-based)
 function RoughCanvas({ className }) {
@@ -28,21 +30,17 @@ function RoughCanvas({ className }) {
       const w = canvas.offsetWidth
       const h = canvas.offsetHeight
 
-      // Draw scattered hand-drawn shapes
       rc.rectangle(w * 0.05, h * 0.1, 120, 80, { stroke: '#5B57D1', strokeWidth: 1.5, roughness: 2 })
       rc.circle(w * 0.85, h * 0.15, 90, { stroke: '#c873e4', strokeWidth: 1.5, roughness: 2 })
       rc.line(w * 0.15, h * 0.85, w * 0.35, h * 0.75, { stroke: '#5B57D1', strokeWidth: 1.5, roughness: 2 })
       rc.ellipse(w * 0.75, h * 0.8, 140, 70, { stroke: '#444480', strokeWidth: 1.2, roughness: 2.5 })
       rc.rectangle(w * 0.45, h * 0.05, 80, 60, { stroke: '#3a3a50', strokeWidth: 1, roughness: 3 })
       rc.line(w * 0.6, h * 0.9, w * 0.9, h * 0.85, { stroke: '#c873e4', strokeWidth: 1, roughness: 2 })
-
-      // Arrow-like shape
       rc.linearPath([
         [w * 0.08, h * 0.55],
         [w * 0.18, h * 0.45],
         [w * 0.16, h * 0.47],
       ], { stroke: '#444480', strokeWidth: 1.2, roughness: 2 })
-
       rc.circle(w * 0.5, h * 0.92, 40, { stroke: '#3a3a50', strokeWidth: 1, roughness: 3 })
       rc.rectangle(w * 0.88, h * 0.45, 70, 50, { stroke: '#5B57D1', strokeWidth: 1, roughness: 2.5 })
     }
@@ -54,7 +52,6 @@ function RoughCanvas({ className }) {
   return <canvas ref={canvasRef} className={className} />
 }
 
-// Animated feature card
 function FeatureCard({ icon, title, description, delay }) {
   return (
     <motion.div
@@ -75,7 +72,6 @@ function FeatureCard({ icon, title, description, delay }) {
   )
 }
 
-// Animated toolbar preview
 function ToolbarPreview() {
   const tools = [
     { icon: 'bx-pointer', label: 'Select' },
@@ -124,52 +120,15 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#13171C] text-white font-[lixFont] overflow-x-hidden">
-      {/* Header / Nav */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
-      >
-        <div className="backdrop-blur-xl bg-[#13171C]/80 px-6 py-3 flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
-            <img src="/Images/logo.png" alt="LixSketch" className="w-7 h-7 invert" />
-            <span className="text-lg tracking-wide text-text-secondary">LixSketch</span>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-8 text-sm text-text-muted">
-            <a href="#features" className="hover:text-text-primary transition-colors">Features</a>
-            <a href="#tools" className="hover:text-text-primary transition-colors">Tools</a>
-            <Link href="/docs" className="hover:text-text-primary transition-colors">Docs</Link>
-            <a
-              href="https://github.com/elixpo/lixsketch"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-text-primary transition-colors flex items-center gap-1.5"
-            >
-              <i className="bx bxl-github text-base" />
-              GitHub
-            </a>
-          </nav>
-
-          <Link
-            href={`/c/${newSessionId}`}
-            className="px-4 py-2 bg-accent-blue hover:bg-accent-blue-hover text-white text-sm rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-accent-blue/20"
-          >
-            Open Canvas
-          </Link>
-        </div>
-      </motion.header>
+      <LandingNav />
 
       {/* Hero Section */}
       <motion.section
         style={{ opacity: heroOpacity, scale: heroScale }}
         className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden"
       >
-        {/* Background rough shapes */}
         <RoughCanvas className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" />
 
-        {/* Gradient orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -223,7 +182,7 @@ export default function LandingPage() {
               className="px-8 py-3.5 bg-surface-card hover:bg-surface-hover border border-border-light text-text-secondary rounded-xl text-base transition-all duration-200 flex items-center gap-2"
             >
               <i className="bx bx-book-open text-xl" />
-              Read Docs
+              LixScript Docs
             </Link>
           </motion.div>
 
@@ -235,7 +194,6 @@ export default function LandingPage() {
             className="mt-16 relative max-w-3xl mx-auto"
           >
             <div className="bg-surface-dark rounded-2xl border border-border-light overflow-hidden shadow-2xl shadow-black/50">
-              {/* Title bar */}
               <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border-light bg-surface-dark">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
@@ -244,16 +202,13 @@ export default function LandingPage() {
                 </div>
                 <span className="text-text-dim text-xs ml-2">LixSketch &mdash; Untitled Canvas</span>
               </div>
-              {/* Canvas area with rough shapes */}
               <div className="relative h-72 md:h-80 bg-[#121212]">
                 <RoughCanvas className="absolute inset-0 w-full h-full opacity-60" />
-                {/* Floating toolbar hint */}
                 <div className="absolute left-3 top-3">
                   <ToolbarPreview />
                 </div>
               </div>
             </div>
-            {/* Glow effect under the mockup */}
             <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-16 bg-accent-blue/10 blur-3xl rounded-full" />
           </motion.div>
         </div>
@@ -424,36 +379,7 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src="/Images/logo.png" alt="LixSketch" className="w-6 h-6 invert" />
-            <span className="text-text-dim text-sm">LixSketch &mdash; Open source canvas for visual thinking</span>
-          </div>
-
-          <div className="flex items-center gap-6 text-sm text-text-dim">
-            <Link href="/docs" className="hover:text-text-primary transition-colors">LixScript Docs</Link>
-            <a
-              href="https://github.com/elixpo/lixsketch"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-text-primary transition-colors flex items-center gap-1.5"
-            >
-              <i className="bx bxl-github text-base" />
-              GitHub
-            </a>
-            <a
-              href="https://elixpo.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-text-primary transition-colors"
-            >
-              Elixpo
-            </a>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   )
 }
