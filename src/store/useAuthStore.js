@@ -46,9 +46,9 @@ const useAuthStore = create((set, get) => ({
 
   // Start OAuth flow — redirect to Elixpo Accounts
   login: () => {
-    const clientId = process.env.ELIXPO_AUTH_CLIENT_ID
+    const clientId = process.env.NEXT_PUBLIC_ELIXPO_AUTH_CLIENT_ID
     const appOrigin = window.location.origin
-    const redirectUri = `http://localhost:3000/api/auth/callback?app_origin=${encodeURIComponent(appOrigin)}`
+    const redirectUri = `${WORKER_URL}`
     const state = crypto.randomUUID()
 
     // Store state for CSRF validation
