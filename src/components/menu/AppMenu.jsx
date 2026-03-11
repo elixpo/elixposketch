@@ -180,7 +180,10 @@ export default function AppMenu() {
 
           {/* Preferences submenu */}
           {prefsOpen && (
-            <div className="absolute right-full top-0 mr-2 w-[250px] bg-surface/90 backdrop-blur-lg rounded-xl border border-border-light p-2 font-[lixFont]">
+            <div
+              className="absolute right-full top-0 mr-2 w-[250px] bg-surface/90 backdrop-blur-lg rounded-xl border border-border-light p-2 font-[lixFont]"
+              onClick={(e) => e.stopPropagation()}
+            >
               {PREFERENCE_ITEMS.map((item) => {
                 const isActive =
                   (item.id === 'toolLock' && toolLock) ||
