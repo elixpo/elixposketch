@@ -44,10 +44,13 @@
 /* Global utilities */
 body {
   margin: 0;
-  overflow: hidden;
   background: #13171C;
   font-family: "lixFont", sans-serif;
   font-size: 14px;
+}
+
+body.canvas-mode {
+  overflow: hidden;
 }
 
 /* Hide scrollbars */

@@ -592,7 +592,7 @@ export default function AIModal() {
       <AIToast status={toast.status} message={toast.message} onDismiss={() => setToast({ status: null, message: '' })} />
 
       {aiModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center font-[lixFont]" onClick={handleClose}>
+        <div className="fixed inset-0 z-9999 flex items-center justify-center font-[lixFont]" onClick={handleClose}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
           <div
@@ -700,7 +700,7 @@ export default function AIModal() {
                   />
 
                   {/* Quick examples */}
-                  <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                  <div className="mt-3 pt-3 border-t border-white/6">
                     <p className="text-text-muted text-xs uppercase tracking-wider mb-2">Quick Examples</p>
                     <div className="flex flex-wrap gap-1.5">
                       {[
