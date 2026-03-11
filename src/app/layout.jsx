@@ -3,7 +3,7 @@ import './globals.css'
 const SITE_URL = 'https://sketch.elixpo.com'
 const SITE_NAME = 'LixSketch'
 const SITE_DESCRIPTION =
-  'Open-source alternative to Eraser.io — infinite canvas with hand-drawn aesthetics, real-time collaboration, docs editor, and LixScript diagram DSL. Free forever.'
+  'Open-source infinite canvas with hand-drawn aesthetics, real-time collaboration, docs editor, and LixScript diagram DSL. Free forever.'
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
