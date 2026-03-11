@@ -47,6 +47,7 @@ const useUIStore = create((set, get) => ({
   aiModalOpen: false,
   commandPaletteOpen: false,
   helpModalOpen: false,
+  exportImageModalOpen: false,
 
   toggleShortcutsModal: () =>
     set((s) => ({ shortcutsModalOpen: !s.shortcutsModalOpen })),
@@ -58,8 +59,10 @@ const useUIStore = create((set, get) => ({
     set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
   toggleHelpModal: () =>
     set((s) => ({ helpModalOpen: !s.helpModalOpen })),
+  toggleExportImageModal: () =>
+    set((s) => ({ exportImageModalOpen: !s.exportImageModalOpen })),
   closeAllModals: () =>
-    set({ shortcutsModalOpen: false, saveModalOpen: false, aiModalOpen: false, commandPaletteOpen: false, helpModalOpen: false }),
+    set({ shortcutsModalOpen: false, saveModalOpen: false, aiModalOpen: false, commandPaletteOpen: false, helpModalOpen: false, exportImageModalOpen: false }),
 
   // --- Menu ---
   menuOpen: false,

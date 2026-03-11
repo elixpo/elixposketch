@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from 'react'
 import useUIStore from '@/store/useUIStore'
 import useSketchStore from '@/store/useSketchStore'
 
@@ -11,24 +12,29 @@ const CANVAS_BACKGROUNDS = [
   { color: '#1B1615', label: 'Dark Brown' },
 ]
 
-const MENU_ITEMS = [
-  { label: 'Open', shortcut: 'Ctrl+O', icon: 'bx-folder-open' },
-  { label: 'Save As', shortcut: 'Ctrl+S', icon: 'bx-save', action: 'save' },
-  { label: 'Commands', shortcut: 'Ctrl+/', icon: 'bx-command', action: 'commands', highlight: true },
-  { label: 'Find Text', shortcut: 'Ctrl+F', icon: 'bx-search' },
-  { label: 'Help', icon: 'bx-help-circle', action: 'help' },
-  { label: 'Reset The Canvas', icon: 'bx-reset', action: 'reset' },
-]
-
 const LINKS = [
   { label: 'GitHub', icon: 'bxl-github', href: 'https://github.com/elixpo/lixsketch' },
   { label: 'Report An Issue', icon: 'bx-bug', href: 'https://github.com/elixpo/lixsketch/issues' },
+]
+
+const PREFERENCE_ITEMS = [
+  { label: 'Tool lock', shortcut: 'Q', id: 'toolLock' },
+  { label: 'Snap to objects', shortcut: 'Alt+S', id: 'snapObjects' },
+  { label: 'Toggle grid', shortcut: "Ctrl+'", id: 'toggleGrid' },
+  { label: 'Zen mode', shortcut: 'Alt+Z', id: 'zenMode' },
+  { label: 'View mode', shortcut: 'Alt+R', id: 'viewMode' },
+  { label: 'Canvas & Shape properties', shortcut: 'Alt+/', id: 'properties' },
+  { label: 'Arrow binding', id: 'arrowBinding', toggle: true },
+  { label: 'Snap to midpoints', id: 'snapMidpoints', toggle: true },
 ]
 
 export default function AppMenu() {
   const menuOpen = useUIStore((s) => s.menuOpen)
   const closeMenu = useUIStore((s) => s.closeMenu)
   const toggleSaveModal = useUIStore((s) => s.toggleSaveModal)
+  const toggleCommandPalette = useUIStore((s) => s.toggleCommandPalette)
+  const toggleHelpModal = useUIStore((s) => s.toggleHelpModal)
+  const toggleExportImageModal = useUIStore((s) => s.toggleExportImageModal)
   const theme = useUIStore((s) => s.theme)
   const setTheme = useUIStore((s) => s.setTheme)
   const canvasBackground = useSketchStore((s) => s.canvasBackground)
@@ -38,33 +44,27 @@ export default function AppMenu() {
   const gridEnabled = useSketchStore((s) => s.gridEnabled)
   const toggleGrid = useSketchStore((s) => s.toggleGrid)
 
-  const toggleCommandPalette = useUIStore((s) => s.toggleCommandPalette)
-  const toggleHelpModal = useUIStore((s) => s.toggleHelpModal)
+  const [prefsOpen, setPrefsOpen] = useState(false)
 
-  const handleItemClick = (item) => {
-    if (item.action === 'save') {
-      toggleSaveModal()
-      closeMenu()
-    } else if (item.action === 'reset') {
-      clearShapes()
-      clearHistory()
-      closeMenu()
-    } else if (item.action === 'commands') {
-      toggleCommandPalette()
-      closeMenu()
-    } else if (item.action === 'help') {
-      toggleHelpModal()
-      closeMenu()
+  const handleOpen = () => {
+    const serializer = window.__sceneSerializer
+    if (serializer) {
+      serializer.upload().then((result) => {
+        if (result && result.success) closeMenu()
+        else if (result && result.error) {
+          console.warn('[Open] Invalid scene file:', result.error)
+        }
+      })
     }
+    closeMenu()
   }
 
   return (
     <>
-      {/* Invisible backdrop to close menu on outside click */}
       {menuOpen && (
         <div
           className="fixed inset-0 z-[999]"
-          onClick={closeMenu}
+          onClick={() => { closeMenu(); setPrefsOpen(false) }}
         />
       )}
       <div
@@ -74,107 +74,213 @@ export default function AppMenu() {
             : 'opacity-0 blur-[20px] pointer-events-none'
         }`}
       >
-      {/* Menu items */}
-      {MENU_ITEMS.map((item) => (
+        {/* Open */}
         <button
-          key={item.label}
-          onClick={() => handleItemClick(item)}
-          className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all duration-200 ${
-            item.highlight
-              ? 'text-accent-blue bg-accent-blue/10 hover:bg-accent-blue/20'
-              : 'text-text-secondary hover:bg-surface-hover'
-          }`}
+          onClick={handleOpen}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
         >
           <span className="flex items-center gap-2">
-            <i className={`bx ${item.icon} text-sm`} />
-            {item.label}
+            <i className="bx bx-folder-open text-sm" />
+            Open
           </span>
-          {item.shortcut && (
-            <span className="text-text-dim text-xs">{item.shortcut}</span>
-          )}
+          <span className="text-text-dim text-xs">Ctrl+O</span>
         </button>
-      ))}
 
-      {/* Grid toggle */}
-      <button
-        onClick={toggleGrid}
-        className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
-      >
-        <span className="flex items-center gap-2">
-          <i className={`bx bx-grid-alt text-sm`} />
-          Show Grid
-        </span>
-        <div className={`w-7 h-4 rounded-full transition-all duration-150 relative ${gridEnabled ? 'bg-accent-blue' : 'bg-white/10'}`}>
-          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all duration-150 ${gridEnabled ? 'left-3.5' : 'left-0.5'}`} />
-        </div>
-      </button>
-
-      <hr className="border-border-light my-1.5" />
-
-      {/* Links */}
-      {LINKS.map((link) => (
-        <a
-          key={link.label}
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+        {/* Save As */}
+        <button
+          onClick={() => { toggleSaveModal(); closeMenu() }}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
         >
-          <i className={`bx ${link.icon} text-sm`} />
-          {link.label}
-        </a>
-      ))}
+          <span className="flex items-center gap-2">
+            <i className="bx bx-save text-sm" />
+            Save As
+          </span>
+          <span className="text-text-dim text-xs">Ctrl+S</span>
+        </button>
 
-      <hr className="border-border-light my-1.5" />
+        {/* Export Image */}
+        <button
+          onClick={() => { toggleExportImageModal(); closeMenu() }}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+        >
+          <span className="flex items-center gap-2">
+            <i className="bx bx-image text-sm" />
+            Export Image
+          </span>
+          <span className="text-text-dim text-xs">Ctrl+Shift+E</span>
+        </button>
 
-      {/* Theme toggle */}
-      <div className="px-3 py-2">
-        <p className="text-text-dim text-xs uppercase tracking-wider mb-2">
-          Theme
-        </p>
-        <div className="flex items-center gap-1">
-          {[
-            { value: 'light', icon: 'bxs-sun' },
-            { value: 'dark', icon: 'bxs-moon' },
-            { value: 'system', icon: 'bx-laptop' },
-          ].map((t) => (
-            <button
-              key={t.value}
-              onClick={() => setTheme(t.value)}
-              className={`flex-1 flex items-center justify-center py-1.5 rounded-lg text-xs transition-all duration-200 ${
-                theme === t.value
-                  ? 'bg-accent text-text-primary'
-                  : 'text-text-muted hover:bg-surface-hover'
-              }`}
-            >
-              <i className={`bx ${t.icon} text-sm`} />
-            </button>
-          ))}
+        <hr className="border-border-light my-1.5" />
+
+        {/* Commands - highlighted */}
+        <button
+          onClick={() => { toggleCommandPalette(); closeMenu() }}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all duration-200 text-accent-blue bg-accent-blue/10 hover:bg-accent-blue/20"
+        >
+          <span className="flex items-center gap-2">
+            <i className="bx bx-command text-sm" />
+            Commands
+          </span>
+          <span className="text-text-dim text-xs">Ctrl+/</span>
+        </button>
+
+        {/* Find Text */}
+        <button
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+        >
+          <span className="flex items-center gap-2">
+            <i className="bx bx-search text-sm" />
+            Find Text
+          </span>
+          <span className="text-text-dim text-xs">Ctrl+F</span>
+        </button>
+
+        {/* Help */}
+        <button
+          onClick={() => { toggleHelpModal(); closeMenu() }}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+        >
+          <span className="flex items-center gap-2">
+            <i className="bx bx-help-circle text-sm" />
+            Help
+          </span>
+        </button>
+
+        <hr className="border-border-light my-1.5" />
+
+        {/* Preferences - with submenu */}
+        <div className="relative">
+          <button
+            onClick={() => setPrefsOpen((p) => !p)}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200 ${prefsOpen ? 'bg-surface-hover' : ''}`}
+          >
+            <span className="flex items-center gap-2">
+              <i className="bx bx-cog text-sm" />
+              Preferences
+            </span>
+            <i className={`bx bx-chevron-right text-sm text-text-dim transition-transform duration-150 ${prefsOpen ? 'rotate-90' : ''}`} />
+          </button>
+
+          {/* Preferences submenu */}
+          {prefsOpen && (
+            <div className="absolute right-full top-0 mr-2 w-[250px] bg-surface/90 backdrop-blur-lg rounded-xl border border-border-light p-2 font-[lixFont]">
+              {PREFERENCE_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id === 'toggleGrid') toggleGrid()
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+                >
+                  <span className="flex items-center gap-2">
+                    {item.toggle && (
+                      <i className="bx bx-check text-sm text-accent-blue" />
+                    )}
+                    {!item.toggle && item.id === 'toggleGrid' && gridEnabled && (
+                      <i className="bx bx-check text-sm text-accent-blue" />
+                    )}
+                    {item.label}
+                  </span>
+                  {item.shortcut && (
+                    <span className="text-text-dim text-xs">{item.shortcut}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Grid toggle */}
+        <button
+          onClick={toggleGrid}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+        >
+          <span className="flex items-center gap-2">
+            <i className="bx bx-grid-alt text-sm" />
+            Show Grid
+          </span>
+          <div className={`w-7 h-4 rounded-full transition-all duration-150 relative ${gridEnabled ? 'bg-accent-blue' : 'bg-white/10'}`}>
+            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all duration-150 ${gridEnabled ? 'left-3.5' : 'left-0.5'}`} />
+          </div>
+        </button>
+
+        {/* Reset The Canvas */}
+        <button
+          onClick={() => { clearShapes(); clearHistory(); closeMenu() }}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+        >
+          <span className="flex items-center gap-2">
+            <i className="bx bx-reset text-sm" />
+            Reset The Canvas
+          </span>
+        </button>
+
+        <hr className="border-border-light my-1.5" />
+
+        {/* Links */}
+        {LINKS.map((link) => (
+          <a
+            key={link.label}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+          >
+            <i className={`bx ${link.icon} text-sm`} />
+            {link.label}
+          </a>
+        ))}
+
+        <hr className="border-border-light my-1.5" />
+
+        {/* Theme toggle */}
+        <div className="px-3 py-2">
+          <p className="text-text-dim text-xs uppercase tracking-wider mb-2">
+            Theme
+          </p>
+          <div className="flex items-center gap-1">
+            {[
+              { value: 'light', icon: 'bxs-sun' },
+              { value: 'dark', icon: 'bxs-moon' },
+              { value: 'system', icon: 'bx-laptop' },
+            ].map((t) => (
+              <button
+                key={t.value}
+                onClick={() => setTheme(t.value)}
+                className={`flex-1 flex items-center justify-center py-1.5 rounded-lg text-xs transition-all duration-200 ${
+                  theme === t.value
+                    ? 'bg-accent text-text-primary'
+                    : 'text-text-muted hover:bg-surface-hover'
+                }`}
+              >
+                <i className={`bx ${t.icon} text-sm`} />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Canvas background */}
+        <div className="px-3 py-2">
+          <p className="text-text-dim text-xs uppercase tracking-wider mb-2">
+            Canvas Background
+          </p>
+          <div className="flex items-center gap-1.5">
+            {CANVAS_BACKGROUNDS.map((bg) => (
+              <button
+                key={bg.color}
+                onClick={() => setCanvasBackground(bg.color)}
+                title={bg.label}
+                className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${
+                  canvasBackground === bg.color
+                    ? 'border-accent scale-110'
+                    : 'border-border hover:border-border-light'
+                }`}
+                style={{ backgroundColor: bg.color }}
+              />
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* Canvas background */}
-      <div className="px-3 py-2">
-        <p className="text-text-dim text-xs uppercase tracking-wider mb-2">
-          Canvas Background
-        </p>
-        <div className="flex items-center gap-1.5">
-          {CANVAS_BACKGROUNDS.map((bg) => (
-            <button
-              key={bg.color}
-              onClick={() => setCanvasBackground(bg.color)}
-              title={bg.label}
-              className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${
-                canvasBackground === bg.color
-                  ? 'border-accent scale-110'
-                  : 'border-border hover:border-border-light'
-              }`}
-              style={{ backgroundColor: bg.color }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
     </>
   )
 }

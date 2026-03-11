@@ -13,7 +13,7 @@ const COMMANDS = [
   { label: 'Toggle theme', icon: 'bx-sun', section: 'App', action: 'toggleTheme' },
 
   // --- Export ---
-  { label: 'Export image...', icon: 'bx-image', section: 'Export', shortcut: 'Ctrl+Shift+E', action: 'exportPNG' },
+  { label: 'Export image...', icon: 'bx-image', section: 'Export', shortcut: 'Ctrl+Shift+E', action: 'exportImage' },
   { label: 'Save to disk', icon: 'bx-download', section: 'Export', shortcut: 'Ctrl+S', action: 'save' },
   { label: 'Copy to clipboard as PNG', icon: 'bx-clipboard', section: 'Export', shortcut: 'Shift+Alt+C', action: 'copyPNG' },
   { label: 'Copy to clipboard as SVG', icon: 'bx-code-alt', section: 'Export', shortcut: null, action: 'copySVG' },
@@ -159,8 +159,8 @@ export default function CommandPalette() {
       case 'load':
         serializer?.upload()
         break
-      case 'exportPNG':
-        serializer?.exportPNG()
+      case 'exportImage':
+        useUIStore.getState().toggleExportImageModal()
         break
       case 'copyPNG':
         serializer?.copyAsPNG()

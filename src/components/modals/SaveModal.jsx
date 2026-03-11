@@ -4,28 +4,16 @@ import useUIStore from '@/store/useUIStore'
 
 const SAVE_OPTIONS = [
   {
-    id: 'png',
-    label: 'Image',
-    description: 'Export as PNG',
-    icon: 'bxs-image',
-  },
-  {
-    id: 'pdf',
-    label: 'PDF Document',
-    description: 'Export as PDF',
-    icon: 'bxs-file-pdf',
-  },
-  {
     id: 'lixsketch',
-    label: 'Scene (.lixsketch)',
+    label: 'Scene (.json)',
     description: 'Save scene data for later',
     icon: 'bx-braces',
   },
   {
-    id: 'load',
-    label: 'Open Scene',
-    description: 'Load a .lixsketch file',
-    icon: 'bx-folder-open',
+    id: 'pdf',
+    label: 'PDF Document',
+    description: 'Export as PDF via print',
+    icon: 'bxs-file-pdf',
   },
 ]
 
@@ -37,22 +25,14 @@ function handleSaveAction(id, toggleModal) {
   }
 
   switch (id) {
-    case 'png':
-      serializer.exportPNG()
-      break
-    case 'pdf':
-      serializer.exportPDF()
-      break
     case 'lixsketch': {
       const name = useUIStore.getState().workspaceName || 'Untitled'
       serializer.download(name)
       break
     }
-    case 'load':
-      serializer.upload().then((success) => {
-        if (success) toggleModal()
-      }).catch(() => {})
-      return // Don't close modal yet — wait for file load
+    case 'pdf':
+      serializer.exportPDF()
+      break
   }
 
   toggleModal()

@@ -21,6 +21,17 @@ export default function useKeyboardShortcuts() {
           useUIStore.getState().toggleCommandPalette()
           return
         }
+        if (key === 'o') {
+          e.preventDefault()
+          const serializer = window.__sceneSerializer
+          if (serializer) serializer.upload()
+          return
+        }
+        if (key === 'e' && e.shiftKey) {
+          e.preventDefault()
+          useUIStore.getState().toggleExportImageModal()
+          return
+        }
       }
 
       // Skip if user is typing in an input, textarea, or contenteditable
@@ -132,6 +143,10 @@ export default function useKeyboardShortcuts() {
           const uiStore = useUIStore.getState()
           if (uiStore.commandPaletteOpen) {
             uiStore.toggleCommandPalette()
+            return
+          }
+          if (uiStore.exportImageModalOpen) {
+            uiStore.toggleExportImageModal()
             return
           }
           if (uiStore.helpModalOpen) {
