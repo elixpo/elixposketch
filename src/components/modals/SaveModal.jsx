@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import useUIStore from '@/store/useUIStore'
-import { getShareableLink } from '@/hooks/useSessionID'
-import { generateKey } from '@/utils/encryption'
+import useAuthStore, { WORKER_URL } from '@/store/useAuthStore'
+import { getSessionID } from '@/hooks/useSessionID'
+import { useProfileStore } from '@/hooks/useGuestProfile'
+import { generateKey, encrypt } from '@/utils/encryption'
 
 const SAVE_OPTIONS = [
   {
@@ -48,18 +50,73 @@ export default function SaveModal() {
   const setWorkspaceName = useUIStore((s) => s.setWorkspaceName)
   const [shareLink, setShareLink] = useState('')
   const [copied, setCopied] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [permission, setPermission] = useState('view')
 
   if (!saveModalOpen) return null
 
   const handleGenerateLink = async () => {
-    let key = useUIStore.getState().sessionEncryptionKey
-    if (!key) {
-      key = await generateKey()
-      useUIStore.getState().setSessionEncryptionKey(key)
+    setSaving(true)
+    setSaveError('')
+
+    try {
+      // 1. Get or generate encryption key
+      let key = useUIStore.getState().sessionEncryptionKey
+      if (!key) {
+        key = await generateKey()
+        useUIStore.getState().setSessionEncryptionKey(key)
+      }
+
+      // 2. Serialize the scene
+      const serializer = window.__sceneSerializer
+      if (!serializer) {
+        setSaveError('Scene not ready')
+        setSaving(false)
+        return
+      }
+
+      const sceneData = serializer.saveScene()
+      const sceneJson = JSON.stringify(sceneData)
+
+      // 3. Encrypt the scene
+      const encryptedData = await encrypt(sceneJson, key)
+
+      // 4. Save to cloud via worker
+      const sessionId = getSessionID()
+      const profile = useProfileStore.getState().profile
+      const authUser = useAuthStore.getState().user
+
+      const res = await fetch(`${WORKER_URL}/api/scenes/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          encryptedData,
+          permission,
+          workspaceName: workspaceName || 'Untitled',
+          createdBy: authUser?.id || profile?.id || null,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Failed to save')
+      }
+
+      const { token } = await res.json()
+
+      // 5. Build shareable link with token and encryption key in fragment
+      const origin = window.location.origin
+      const link = `${origin}/s/${token}#key=${key}`
+      setShareLink(link)
+      setCopied(false)
+    } catch (err) {
+      console.error('[SaveModal] Failed to save scene:', err)
+      setSaveError(err.message || 'Failed to save scene')
+    } finally {
+      setSaving(false)
     }
-    const link = getShareableLink(key)
-    setShareLink(link)
-    setCopied(false)
   }
 
   const handleCopyLink = () => {
@@ -118,6 +175,25 @@ export default function SaveModal() {
             </span>
           </div>
 
+          {/* Permission selector */}
+          {!shareLink && (
+            <div className="flex items-center gap-1.5 mb-2.5">
+              {['view', 'edit'].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPermission(p)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs transition-all duration-200 ${
+                    permission === p
+                      ? 'bg-accent-blue/20 text-accent-blue'
+                      : 'bg-surface text-text-muted hover:bg-surface-hover'
+                  }`}
+                >
+                  {p === 'view' ? 'View only' : 'Can edit'}
+                </button>
+              ))}
+            </div>
+          )}
+
           {shareLink ? (
             <div className="flex items-center gap-2">
               <input
@@ -141,14 +217,19 @@ export default function SaveModal() {
           ) : (
             <button
               onClick={handleGenerateLink}
-              className="w-full py-2.5 rounded-lg bg-accent-blue hover:bg-accent-blue-hover text-text-primary text-sm transition-all duration-200"
+              disabled={saving}
+              className="w-full py-2.5 rounded-lg bg-accent-blue hover:bg-accent-blue-hover text-text-primary text-sm transition-all duration-200 disabled:opacity-50"
             >
-              Generate Share Link
+              {saving ? 'Saving to cloud...' : 'Generate Share Link'}
             </button>
           )}
 
+          {saveError && (
+            <p className="text-red-400 text-[10px] mt-2">{saveError}</p>
+          )}
+
           <p className="text-text-dim text-[10px] mt-2 leading-relaxed">
-            The encryption key is stored in the URL fragment and never sent to the server.
+            Scene is encrypted and saved to the cloud. The encryption key stays in the URL fragment and is never sent to the server.
           </p>
         </div>
 
@@ -160,7 +241,7 @@ export default function SaveModal() {
               <span className="text-text-primary text-sm font-medium">Live Collaborate</span>
               <p className="text-text-dim text-[10px] leading-relaxed">Real-time editing with up to 10 people</p>
             </div>
-            <span className="text-text-dim text-[10px] px-1.5 py-0.5 rounded bg-accent-blue/15 text-accent-blue">Soon</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-blue/15 text-accent-blue">Soon</span>
           </div>
         </div>
 
