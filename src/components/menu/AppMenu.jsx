@@ -79,7 +79,7 @@ export default function AppMenu() {
         />
       )}
       <div
-        className={`absolute top-14 right-4 w-[220px] bg-surface/75 backdrop-blur-lg rounded-2xl z-[1000] border border-border-light p-2 font-[lixFont] transition-all duration-200 ${
+        className={`absolute top-14 right-4 w-[220px] max-h-[calc(100vh-70px)] overflow-y-auto no-scrollbar bg-surface/75 backdrop-blur-lg rounded-2xl z-[1000] border border-border-light p-2 font-[lixFont] transition-all duration-200 ${
           menuOpen
             ? 'opacity-100 blur-0 pointer-events-auto'
             : 'opacity-0 blur-[20px] pointer-events-none'
