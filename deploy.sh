@@ -42,7 +42,7 @@ secrets() {
     [[ "$key" =~ ^(CLOUDFLARE_ACCOUNT|D1_DATABASE_ID|KV_NAMESPACE_ID)$ ]] && continue
 
     echo "  -> $key"
-    echo "$value" | npx wrangler secret put "$key" 2>/dev/null
+    echo "$value" | sudo npx wrangler secret put "$key" 2>/dev/null
   done < "$ENV_FILE"
 
   echo "==> Secrets uploaded."
@@ -50,11 +50,8 @@ secrets() {
 
 # Build Next.js for Cloudflare Pages
 build() {
-  echo "==> Cleaning previous build..."
-  rm -rf "$SCRIPT_DIR/.next" "$SCRIPT_DIR/.vercel"
-
   echo "==> Building for Cloudflare Pages..."
-  npx @cloudflare/next-on-pages
+  sudo npx @cloudflare/next-on-pages
 
   echo "==> Build complete (.vercel/output/static)"
 }
@@ -67,7 +64,7 @@ pages() {
   fi
 
   echo "==> Deploying to Cloudflare Pages ($PAGES_PROJECT)..."
-  npx wrangler pages deploy .vercel/output/static \
+  sudo npx wrangler pages deploy .vercel/output/static \
     --project-name "$PAGES_PROJECT" \
     --branch "$PAGES_BRANCH" \
     --compatibility-flag nodejs_compat
@@ -78,7 +75,7 @@ pages() {
 # Deploy the collab Worker
 worker() {
   echo "==> Deploying Worker (lixsketch-collab)..."
-  npx wrangler deploy
+  sudo npx wrangler deploy
   echo "==> Worker deploy complete."
 }
 
