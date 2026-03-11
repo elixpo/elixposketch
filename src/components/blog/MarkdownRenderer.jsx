@@ -236,6 +236,42 @@ function RoughLixScriptCanvas({ parsed }) {
 
       const rc = rough.canvas(canvas)
 
+      // Background color for label cutout effect
+      const BG = '#0a0a12'
+      const LABEL_PAD_X = 6
+      const LABEL_PAD_Y = 3
+
+      // Helper: draw text with a background rect that "cuts through" lines behind it
+      function drawLabel(text, x, y, font, color, align, baseline) {
+        ctx.save()
+        ctx.font = font
+        ctx.textAlign = align || 'center'
+        ctx.textBaseline = baseline || 'middle'
+        const metrics = ctx.measureText(text)
+        const tw = metrics.width
+        // Approximate text height from font size
+        const fontSize = parseInt(font) || 14
+        const th = fontSize * 1.15
+
+        // Calculate background rect position based on alignment
+        let bgX = x - tw / 2 - LABEL_PAD_X
+        if (align === 'left' || align === 'start') bgX = x - LABEL_PAD_X
+        else if (align === 'right' || align === 'end') bgX = x - tw - LABEL_PAD_X
+
+        let bgY = y - th / 2 - LABEL_PAD_Y
+        if (baseline === 'top' || baseline === 'hanging') bgY = y - LABEL_PAD_Y
+        else if (baseline === 'bottom') bgY = y - th - LABEL_PAD_Y
+
+        // Draw background cutout
+        ctx.fillStyle = BG
+        ctx.fillRect(bgX, bgY, tw + LABEL_PAD_X * 2, th + LABEL_PAD_Y * 2)
+
+        // Draw text
+        ctx.fillStyle = color
+        ctx.fillText(text, x, y)
+        ctx.restore()
+      }
+
       // Draw each shape with RoughJS
       for (const def of defs) {
         const props = def.props || {}
@@ -253,13 +289,9 @@ function RoughLixScriptCanvas({ parsed }) {
               fillStyle: fill !== 'transparent' ? 'solid' : undefined,
             })
             if (props.label) {
-              ctx.save()
-              ctx.font = `${props.labelFontSize || 14}px lixFont, sans-serif`
-              ctx.fillStyle = props.labelColor || '#e0e0e0'
-              ctx.textAlign = 'center'
-              ctx.textBaseline = 'middle'
-              ctx.fillText(props.label, x + w / 2, y + h / 2)
-              ctx.restore()
+              drawLabel(props.label, x + w / 2, y + h / 2,
+                `${props.labelFontSize || 14}px lixFont, sans-serif`,
+                props.labelColor || '#e0e0e0', 'center', 'middle')
             }
             break
           }
@@ -274,25 +306,18 @@ function RoughLixScriptCanvas({ parsed }) {
               fillStyle: fill !== 'transparent' ? 'solid' : undefined,
             })
             if (props.label) {
-              ctx.save()
-              ctx.font = `${props.labelFontSize || 14}px lixFont, sans-serif`
-              ctx.fillStyle = props.labelColor || '#e0e0e0'
-              ctx.textAlign = 'center'
-              ctx.textBaseline = 'middle'
-              ctx.fillText(props.label, cx, cy)
-              ctx.restore()
+              drawLabel(props.label, cx, cy,
+                `${props.labelFontSize || 14}px lixFont, sans-serif`,
+                props.labelColor || '#e0e0e0', 'center', 'middle')
             }
             break
           }
 
           case 'text': {
             const content = props.content || props.text || 'Text'
-            ctx.save()
-            ctx.font = `${props.fontSize || 16}px lixFont, sans-serif`
-            ctx.fillStyle = props.color || props.fill || '#fff'
-            ctx.textBaseline = 'top'
-            ctx.fillText(content, def.x || 0, def.y || 0)
-            ctx.restore()
+            drawLabel(content, def.x || 0, def.y || 0,
+              `${props.fontSize || 16}px lixFont, sans-serif`,
+              props.color || props.fill || '#fff', 'left', 'top')
             break
           }
 
@@ -331,17 +356,13 @@ function RoughLixScriptCanvas({ parsed }) {
             ctx.fill()
             ctx.restore()
 
-            // Label
+            // Label with background cutout
             if (props.label) {
               const lx = (from.x + toOrig.x) / 2
-              const ly = (from.y + toOrig.y) / 2 - 10
-              ctx.save()
-              ctx.font = '11px lixFont, sans-serif'
-              ctx.fillStyle = props.labelColor || '#a0a0b0'
-              ctx.textAlign = 'center'
-              ctx.textBaseline = 'bottom'
-              ctx.fillText(props.label, lx, ly)
-              ctx.restore()
+              const ly = (from.y + toOrig.y) / 2
+              drawLabel(props.label, lx, ly,
+                '11px lixFont, sans-serif',
+                props.labelColor || '#a0a0b0', 'center', 'middle')
             }
             break
           }
@@ -365,12 +386,9 @@ function RoughLixScriptCanvas({ parsed }) {
               strokeLineDash: [8, 4],
             })
             if (props.name || def.id) {
-              ctx.save()
-              ctx.font = '12px lixFont, sans-serif'
-              ctx.fillStyle = '#888'
-              ctx.textBaseline = 'bottom'
-              ctx.fillText(props.name || def.id, x + 10, y - 4)
-              ctx.restore()
+              drawLabel(props.name || def.id, x + 10, y - 4,
+                '12px lixFont, sans-serif',
+                '#888', 'left', 'bottom')
             }
             break
           }
@@ -383,7 +401,7 @@ function RoughLixScriptCanvas({ parsed }) {
   }, [parsed])
 
   return (
-    <div ref={containerRef} className="bg-[#0a0a12] p-6 flex items-center justify-center min-h-48 overflow-auto">
+    <div ref={containerRef} className="bg-[#0a0a12] p-6 flex items-center justify-center min-h-48 overflow-auto lixscript-preview">
       <canvas ref={canvasRef} />
     </div>
   )
