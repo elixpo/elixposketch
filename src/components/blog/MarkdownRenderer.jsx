@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false)
@@ -63,48 +63,6 @@ function RoughHeadingLine({ width = 200, color = '#5B57D1', roughness = 2 }) {
   }, [width, color, roughness])
 
   return <canvas ref={canvasRef} className="block mt-1.5 mb-3" />
-}
-
-// ── RoughJS blockquote border ─────────────────────────────────────────────────
-function RoughQuoteBorder({ height = 60 }) {
-  const canvasRef = useRef(null)
-  const containerRef = useRef(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    const container = containerRef.current
-    if (!canvas || !container) return
-
-    let mounted = true
-
-    async function draw() {
-      const rough = (await import('roughjs')).default
-      if (!mounted) return
-
-      const h = container.offsetHeight || height
-      const dpr = window.devicePixelRatio || 1
-      canvas.width = 8 * dpr
-      canvas.height = h * dpr
-      canvas.style.width = '8px'
-      canvas.style.height = h + 'px'
-
-      const ctx = canvas.getContext('2d')
-      ctx.scale(dpr, dpr)
-
-      const rc = rough.canvas(canvas)
-      rc.line(4, 2, 4, h - 2, {
-        stroke: '#5B57D1',
-        strokeWidth: 2,
-        roughness: 1.8,
-        bowing: 0.5,
-      })
-    }
-
-    const timer = setTimeout(draw, 30)
-    return () => { mounted = false; clearTimeout(timer) }
-  }, [height])
-
-  return { canvasRef, containerRef }
 }
 
 function RoughBlockquote({ children }) {
@@ -238,7 +196,7 @@ function LixScriptBlock({ code }) {
             onClick={() => setTab('preview')}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer font-[lixFont] ${
               tab === 'preview'
-                ? 'bg-[#5B57D1]/15 text-[#5B57D1]'
+                ? 'bg-[#8B88E8]/15 text-[#8B88E8]'
                 : 'text-[#444480] hover:text-[#a0a0b0]'
             }`}
           >
@@ -249,7 +207,7 @@ function LixScriptBlock({ code }) {
             onClick={() => setTab('code')}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer font-[lixFont] ${
               tab === 'code'
-                ? 'bg-[#5B57D1]/15 text-[#5B57D1]'
+                ? 'bg-[#8B88E8]/15 text-[#8B88E8]'
                 : 'text-[#444480] hover:text-[#a0a0b0]'
             }`}
           >
@@ -428,7 +386,7 @@ export default function MarkdownRenderer({ content, canvasStyle }) {
           <h1 className={`text-2xl font-semibold ${headingColor} ${font}`}>
             {renderInline(line.slice(2), canvasStyle)}
           </h1>
-          {canvasStyle && <RoughHeadingLine width={240} color="#5B57D1" />}
+          {canvasStyle && <RoughHeadingLine width={240} color="#8B88E8" />}
           {!canvasStyle && <div className="mb-4" />}
         </div>
       )
@@ -441,7 +399,7 @@ export default function MarkdownRenderer({ content, canvasStyle }) {
           <h2 className={`text-xl font-semibold ${headingColor} ${font}`}>
             {renderInline(line.slice(3), canvasStyle)}
           </h2>
-          {canvasStyle && <RoughHeadingLine width={180} color="#c873e4" roughness={2.5} />}
+          {canvasStyle && <RoughHeadingLine width={180} color="#D99BF0" roughness={2.5} />}
           {!canvasStyle && <div className="mb-3" />}
         </div>
       )
@@ -454,7 +412,7 @@ export default function MarkdownRenderer({ content, canvasStyle }) {
           <h3 className={`text-base font-medium ${headingColor} ${font}`}>
             {renderInline(line.slice(4), canvasStyle)}
           </h3>
-          {canvasStyle && <RoughHeadingLine width={120} color="#444480" roughness={3} />}
+          {canvasStyle && <RoughHeadingLine width={120} color="#6B6BA0" roughness={3} />}
           {!canvasStyle && <div className="mb-2" />}
         </div>
       )
@@ -516,7 +474,7 @@ export default function MarkdownRenderer({ content, canvasStyle }) {
         <ol key={elements.length} className="list-none space-y-2 my-4">
           {items.map((item, ii) => (
             <li key={ii} className={`flex items-start gap-2.5 ${textColor} text-sm leading-relaxed ${font}`}>
-              <span className="text-[#5B57D1] text-xs font-medium min-w-4 mt-0.5 font-[lixFont]">{ii + 1}.</span>
+              <span className="text-[#8B88E8] text-xs font-medium min-w-4 mt-0.5 font-[lixFont]">{ii + 1}.</span>
               <span>{renderInline(item, canvasStyle)}</span>
             </li>
           ))}
@@ -581,7 +539,7 @@ function renderInline(text, canvasStyle) {
       parts.push(
         <code key={key++} className={
           canvasStyle
-            ? 'font-[lixCode] text-[#5B57D1] text-xs bg-[#161b22] border border-[#30363d] px-1.5 py-0.5 rounded'
+            ? 'font-[lixCode] text-[#8B88E8] text-xs bg-[#161b22] border border-[#30363d] px-1.5 py-0.5 rounded'
             : 'font-[lixCode] text-accent-blue text-xs bg-accent-blue/10 px-1.5 py-0.5 rounded'
         }>
           {match[1]}
@@ -597,7 +555,7 @@ function renderInline(text, canvasStyle) {
       if (match.index > 0) parts.push(remaining.slice(0, match.index))
       parts.push(
         <a key={key++} href={match[2]}
-          className={canvasStyle ? 'text-[#5B57D1] hover:underline font-[lixFont]' : 'text-accent-blue hover:underline'}
+          className={canvasStyle ? 'text-[#8B88E8] hover:underline font-[lixFont]' : 'text-accent-blue hover:underline'}
           target={match[2].startsWith('http') ? '_blank' : undefined}
           rel={match[2].startsWith('http') ? 'noopener noreferrer' : undefined}
         >

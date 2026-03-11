@@ -221,13 +221,13 @@ export default function CanvasPageLayout({
         {/* Header frame */}
         <RoughFrame className="mb-10 p-8">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl bg-[#5B57D1]/10 border border-[#5B57D1]/20 flex items-center justify-center">
-              <i className={`${icon} text-xl text-[#5B57D1]`} />
+            <div className="w-10 h-10 rounded-xl bg-[#8B88E8]/10 border border-[#8B88E8]/20 flex items-center justify-center">
+              <i className={`${icon} text-xl text-[#8B88E8]`} />
             </div>
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {tags.map(tag => (
-                  <span key={tag} className="px-2 py-0.5 text-[10px] rounded-md bg-[#5B57D1]/8 border border-[#5B57D1]/15 text-[#5B57D1]/70 uppercase tracking-wider font-[lixFont]">
+                  <span key={tag} className="px-2 py-0.5 text-[10px] rounded-md bg-[#8B88E8]/8 border border-[#8B88E8]/15 text-[#8B88E8]/80 uppercase tracking-wider font-[lixFont]">
                     {tag}
                   </span>
                 ))}
@@ -235,7 +235,7 @@ export default function CanvasPageLayout({
             )}
           </div>
           <h1 className="text-3xl md:text-4xl font-[lixFont] text-white mb-2 leading-tight">{title}</h1>
-          <RoughUnderline width={280} color="#5B57D1" />
+          <RoughUnderline width={280} color="#8B88E8" />
           <p className="text-[#c9d1d9] text-lg leading-relaxed font-[lixFont]">{description}</p>
         </RoughFrame>
 
