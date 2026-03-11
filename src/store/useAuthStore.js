@@ -4,10 +4,9 @@ import { create } from 'zustand'
 
 const STORAGE_KEY = 'lixsketch-auth'
 const COOKIE_NAME = 'lixsketch-session'
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 // 7 days in seconds
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 // 7 days
 const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL
-
-// --- Persistence helpers (localStorage + cookie) ---
+const ELIXPO_AUTH_URL = 'https://accounts.elixpo.com'
 
 function loadAuth() {
   if (typeof window === 'undefined') return null
@@ -15,7 +14,6 @@ function loadAuth() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) return JSON.parse(raw)
   } catch {}
-  // Fallback: try cookie
   try {
     const match = document.cookie.match(new RegExp(`(?:^|; )${COOKIE_NAME}=([^;]*)`))
     if (match) return JSON.parse(decodeURIComponent(match[1]))
@@ -38,17 +36,17 @@ function saveAuth(data) {
 }
 
 const useAuthStore = create((set, get) => ({
-  user: null,           // { id, email, displayName, avatar, isAdmin }
-  sessionToken: null,   // Session token
+  user: null,
+  sessionToken: null,
   isAuthenticated: false,
   activeRooms: 0,
   maxRooms: 10,
   loading: false,
 
-  // Initialize from localStorage/cookie on mount
   init: () => {
     const saved = loadAuth()
     if (saved?.sessionToken && saved?.user) {
+      console.log('[Auth] Restored session:', saved.user.displayName || saved.user.email)
       set({
         user: saved.user,
         sessionToken: saved.sessionToken,
@@ -57,27 +55,31 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
-  // Start OAuth flow — redirect to Elixpo Accounts
   login: () => {
     const clientId = process.env.NEXT_PUBLIC_ELIXPO_AUTH_CLIENT_ID
+    if (!clientId) {
+      console.error('[Auth] Missing NEXT_PUBLIC_ELIXPO_AUTH_CLIENT_ID')
+      return
+    }
     const appOrigin = window.location.origin
     const redirectUri = `${appOrigin}/api/auth/callback`
     const state = crypto.randomUUID()
 
     sessionStorage.setItem('lixsketch-oauth-state', state)
 
-    const authUrl = `https://accounts.elixpo.com/oauth/authorize` +
+    const authUrl = `${ELIXPO_AUTH_URL}/oauth/authorize` +
       `?response_type=code` +
       `&client_id=${encodeURIComponent(clientId)}` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
       `&state=${state}` +
       `&scope=openid profile email`
 
+    console.log('[Auth] Redirecting to Elixpo SSO...', { redirectUri })
     window.location.href = authUrl
   },
 
-  // Handle callback response (called after redirect back)
   handleCallback: async (sessionToken, user) => {
+    console.log('[Auth] Saving session for:', user.displayName || user.email)
     saveAuth({ sessionToken, user })
     set({
       user,
@@ -86,57 +88,39 @@ const useAuthStore = create((set, get) => ({
     })
   },
 
-  // Fetch current user from worker session (no-op for local dev without worker)
+  // Validate session by hitting Elixpo /api/auth/me with the access token
   fetchMe: async () => {
     const token = get().sessionToken
-    if (!token || !WORKER_URL) return
+    if (!token) return
 
     try {
-      const res = await fetch(`${WORKER_URL}/api/auth/me`, {
+      const res = await fetch(`${ELIXPO_AUTH_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
       if (!res.ok) {
+        console.warn('[Auth] Session expired or invalid, logging out')
         get().logout()
         return
       }
 
-      const data = await res.json()
-      set({
-        user: data.user,
-        activeRooms: data.activeRooms || 0,
-        maxRooms: data.maxRooms || 10,
-        isAuthenticated: true,
-      })
-      saveAuth({ sessionToken: token, user: data.user })
+      const profile = await res.json()
+      const user = {
+        id: profile.id || profile.userId,
+        email: profile.email,
+        displayName: profile.displayName,
+        avatar: profile.avatar || null,
+        isAdmin: profile.isAdmin || false,
+      }
+      set({ user, isAuthenticated: true })
+      saveAuth({ sessionToken: token, user })
     } catch {
       // Network error — keep existing state
     }
   },
 
-  // Refresh the session token
-  refresh: async () => {
-    const token = get().sessionToken
-    if (!token || !WORKER_URL) return false
-
-    try {
-      const res = await fetch(`${WORKER_URL}/api/auth/refresh`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (!res.ok) {
-        get().logout()
-        return false
-      }
-      return true
-    } catch {
-      return false
-    }
-  },
-
-  // Clear auth state — falls back to guest profile automatically
   logout: () => {
+    console.log('[Auth] Signing out')
     saveAuth(null)
     set({
       user: null,

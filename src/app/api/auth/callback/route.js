@@ -5,64 +5,97 @@ const ELIXPO_AUTH_URL = 'https://accounts.elixpo.com'
 export async function GET(request) {
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
-  const state = url.searchParams.get('state')
   const error = url.searchParams.get('error')
-  const appOrigin = url.searchParams.get('app_origin') || 'http://localhost:3000'
+  const errorDesc = url.searchParams.get('error_description')
+  const appOrigin = url.origin // same origin since callback is on our Next.js app
 
   if (error) {
-    return NextResponse.redirect(`${appOrigin}?auth_error=${encodeURIComponent(error)}`)
+    console.error('[auth/callback] OAuth error:', error, errorDesc)
+    return NextResponse.redirect(new URL(`/?auth_error=${encodeURIComponent(error)}`, appOrigin))
   }
 
   if (!code) {
-    return NextResponse.redirect(`${appOrigin}?auth_error=missing_code`)
+    console.error('[auth/callback] No code in callback')
+    return NextResponse.redirect(new URL('/?auth_error=missing_code', appOrigin))
   }
 
-  const redirectUri = `${url.origin}/api/auth/callback`
+  // redirect_uri must match EXACTLY what was sent to /oauth/authorize
+  const redirectUri = `${appOrigin}/api/auth/callback`
+
+  console.log('[auth/callback] Exchanging code for tokens...', { code: code.slice(0, 20) + '...', redirectUri })
 
   // Exchange code for tokens
-  const tokenRes = await fetch(`${ELIXPO_AUTH_URL}/api/auth/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      code,
-      client_id: process.env.NEXT_PUBLIC_ELIXPO_AUTH_CLIENT_ID,
-      client_secret: process.env.ELIXPO_AUTH_CLIENT_SECRET,
-      redirect_uri: redirectUri,
-    }),
-  })
+  let tokenRes
+  try {
+    tokenRes = await fetch(`${ELIXPO_AUTH_URL}/api/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        code,
+        client_id: process.env.NEXT_PUBLIC_ELIXPO_AUTH_CLIENT_ID,
+        client_secret: process.env.ELIXPO_AUTH_CLIENT_SECRET,
+        redirect_uri: redirectUri,
+      }),
+    })
+  } catch (fetchErr) {
+    console.error('[auth/callback] Token fetch failed:', fetchErr)
+    return NextResponse.redirect(new URL('/?auth_error=token_fetch_failed', appOrigin))
+  }
 
   if (!tokenRes.ok) {
-    const err = await tokenRes.json().catch(() => ({}))
-    console.error('[auth/callback] Token exchange failed:', err)
-    return NextResponse.redirect(`${appOrigin}?auth_error=token_exchange_failed`)
+    const errBody = await tokenRes.text().catch(() => 'unknown')
+    console.error('[auth/callback] Token exchange failed:', tokenRes.status, errBody)
+    return NextResponse.redirect(new URL(`/?auth_error=token_exchange_failed&detail=${encodeURIComponent(errBody)}`, appOrigin))
   }
 
   const tokens = await tokenRes.json()
+  console.log('[auth/callback] Got tokens, fetching profile...')
 
-  // Fetch user profile
-  const userRes = await fetch(`${ELIXPO_AUTH_URL}/api/auth/me`, {
-    headers: { Authorization: `Bearer ${tokens.access_token}` },
-  })
+  // Fetch user profile using the access_token
+  let userRes
+  try {
+    userRes = await fetch(`${ELIXPO_AUTH_URL}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    })
+  } catch (fetchErr) {
+    console.error('[auth/callback] Profile fetch failed:', fetchErr)
+    return NextResponse.redirect(new URL('/?auth_error=profile_fetch_failed', appOrigin))
+  }
 
   if (!userRes.ok) {
-    return NextResponse.redirect(`${appOrigin}?auth_error=profile_fetch_failed`)
+    const errBody = await userRes.text().catch(() => 'unknown')
+    console.error('[auth/callback] Profile fetch error:', userRes.status, errBody)
+    return NextResponse.redirect(new URL('/?auth_error=profile_fetch_failed', appOrigin))
   }
 
   const profile = await userRes.json()
+  console.log('[auth/callback] Got profile:', { id: profile.id, email: profile.email, displayName: profile.displayName })
 
-  // Build session token (simple random hex for now — in production this goes through the worker + KV)
-  const sessionToken = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, '')
-
+  // Elixpo /api/auth/me returns: { id, userId, email, displayName, isAdmin, provider, avatar, emailVerified }
   const userParam = encodeURIComponent(JSON.stringify({
-    id: profile.id,
+    id: profile.id || profile.userId,
     email: profile.email,
     displayName: profile.displayName,
-    avatar: profile.avatar,
-    isAdmin: profile.isAdmin,
+    avatar: profile.avatar || null,
+    isAdmin: profile.isAdmin || false,
   }))
 
-  return NextResponse.redirect(
-    `${appOrigin}?auth_token=${sessionToken}&auth_user=${userParam}`
-  )
+  // Use the access_token as our session token (it's a JWT from Elixpo)
+  const sessionToken = tokens.access_token
+
+  // Store refresh token in an httpOnly cookie for later token refresh
+  const response = NextResponse.redirect(new URL(`/?auth_token=${encodeURIComponent(sessionToken)}&auth_user=${userParam}`, appOrigin))
+
+  if (tokens.refresh_token) {
+    response.cookies.set('lixsketch-refresh-token', tokens.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    })
+  }
+
+  return response
 }

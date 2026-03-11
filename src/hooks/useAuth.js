@@ -3,32 +3,38 @@
 import { useEffect } from 'react'
 import useAuthStore from '@/store/useAuthStore'
 
-/**
- * Initializes auth state from localStorage and handles OAuth callback.
- *
- * The OAuth flow works via the Cloudflare Worker:
- * 1. User clicks Sign In → redirected to accounts.elixpo.com
- * 2. After consent, redirected to Worker /api/auth/callback
- * 3. Worker exchanges code for tokens, creates session, returns JSON
- * 4. Worker redirects back to app with ?auth_token=...&auth_user=... in URL
- * 5. This hook picks up those params and stores them
- */
 export default function useAuth() {
   const init = useAuthStore((s) => s.init)
   const handleCallback = useAuthStore((s) => s.handleCallback)
 
   useEffect(() => {
-    // Check for OAuth callback params in URL
     const url = new URL(window.location.href)
+
+    // Check for auth error from callback
+    const authError = url.searchParams.get('auth_error')
+    if (authError) {
+      const detail = url.searchParams.get('detail')
+      console.error('[Auth] SSO error:', authError, detail || '')
+      // Clean URL
+      url.searchParams.delete('auth_error')
+      url.searchParams.delete('detail')
+      window.history.replaceState(null, '', url.pathname + url.hash)
+      // Still init guest profile
+      init()
+      return
+    }
+
+    // Check for OAuth callback params
     const authToken = url.searchParams.get('auth_token')
     const authUser = url.searchParams.get('auth_user')
 
     if (authToken && authUser) {
       try {
-        const user = JSON.parse(decodeURIComponent(authUser))
+        const user = JSON.parse(authUser)
+        console.log('[Auth] SSO callback received:', { id: user.id, email: user.email, displayName: user.displayName })
         handleCallback(authToken, user)
       } catch (e) {
-        console.warn('[Auth] Failed to parse callback params:', e)
+        console.error('[Auth] Failed to parse callback params:', e)
       }
 
       // Clean URL params without reload
@@ -38,7 +44,7 @@ export default function useAuth() {
       return
     }
 
-    // Normal init — restore from localStorage
+    // Normal init — restore from localStorage/cookie
     init()
   }, [init, handleCallback])
 }
