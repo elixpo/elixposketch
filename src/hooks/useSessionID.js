@@ -25,8 +25,10 @@ export default function useSessionID() {
       // Generate new session ID
       sessionID = `lx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
-      // Push to URL without reload
-      window.history.replaceState(null, '', `/${sessionID}`)
+      // Push to URL without reload — preserve query params and hash
+      const search = window.location.search
+      const hash = window.location.hash
+      window.history.replaceState(null, '', `/${sessionID}${search}${hash}`)
     }
 
     // Store on window for the engine

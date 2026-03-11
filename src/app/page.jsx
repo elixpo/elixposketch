@@ -27,10 +27,10 @@ import useGuestProfile from '@/hooks/useGuestProfile'
 import useAuth from '@/hooks/useAuth'
 
 export default function Home() {
+  useAuth()
   useKeyboardShortcuts()
   useSessionID()
   useGuestProfile()
-  useAuth()
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-black">
