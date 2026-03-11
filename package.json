@@ -14,7 +14,8 @@
     "@cloudflare/workers-types": "^4.20260310.1",
     "@tailwindcss/postcss": "^4.2.1",
     "postcss": "^8.5.8",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "wrangler": "^4.72.0"
   },
   "scripts": {
     "dev": "next dev",
