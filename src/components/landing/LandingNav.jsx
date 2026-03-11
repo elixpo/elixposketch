@@ -9,7 +9,8 @@ const resourceLinks = [
   { href: '/resources/community', label: 'Community', icon: 'bx bx-group' },
   { href: '/resources/use-cases', label: 'Use Cases', icon: 'bx bx-bulb' },
   { href: '/resources/security', label: 'Security', icon: 'bx bx-shield' },
-  { href: '/resources/blog', label: 'Blog', icon: 'bx bx-news' },
+  { href: '/docs', label: 'Docs', icon: 'bx bx-book-open' },
+  { href: '/docs#blog', label: 'Blog', icon: 'bx bx-news' },
 ]
 
 export default function LandingNav() {
