@@ -1,5 +1,53 @@
 import { create } from 'zustand'
 
+/**
+ * Swap black↔white colors on all shapes when theme changes.
+ * prevTheme / nextTheme are resolved ('dark' | 'light').
+ */
+function invertShapeColors(prevResolved, nextResolved) {
+  if (prevResolved === nextResolved) return
+  const shapes = window.shapes
+  if (!shapes || shapes.length === 0) return
+
+  // Going light → dark: #000 → #fff.  Going dark → light: #fff → #000.
+  const from = nextResolved === 'light' ? '#ffffff' : '#000000'
+  const to   = nextResolved === 'light' ? '#000000' : '#ffffff'
+
+  const normalize = (c) => {
+    if (!c || c === 'transparent' || c === 'none') return c
+    const lower = c.toLowerCase().trim()
+    if (lower === '#fff' || lower === '#ffffff' || lower === 'white') return '#ffffff'
+    if (lower === '#000' || lower === '#000000' || lower === 'black') return '#000000'
+    return lower
+  }
+
+  for (const shape of shapes) {
+    let changed = false
+    if (shape.options) {
+      if (normalize(shape.options.stroke) === from) {
+        shape.options.stroke = to
+        changed = true
+      }
+      if (normalize(shape.options.fill) === from) {
+        shape.options.fill = to
+        changed = true
+      }
+    }
+    // Text shapes store color directly
+    if (shape.color !== undefined && normalize(shape.color) === from) {
+      shape.color = to
+      changed = true
+    }
+    if (shape.strokeColor !== undefined && normalize(shape.strokeColor) === from) {
+      shape.strokeColor = to
+      changed = true
+    }
+    if (changed && typeof shape.draw === 'function') {
+      shape.draw()
+    }
+  }
+}
+
 function applyTheme(theme) {
   const html = document.documentElement
   let resolved = theme
@@ -23,6 +71,9 @@ function applyTheme(theme) {
     html.style.setProperty('--color-border-light', '#c0c0d0')
     html.style.setProperty('--color-border-accent', '#8080c0')
     document.body.style.background = '#e8e8f0'
+    // Update SVG canvas background
+    const svgEl = window.svg
+    if (svgEl) svgEl.style.background = '#e8e8f0'
   } else {
     html.style.setProperty('--color-surface', '#232329')
     html.style.setProperty('--color-surface-hover', '#343448')
@@ -37,6 +88,8 @@ function applyTheme(theme) {
     html.style.setProperty('--color-border-light', '#3a3a50')
     html.style.setProperty('--color-border-accent', '#5555a0')
     document.body.style.background = '#000'
+    const svgEl = window.svg
+    if (svgEl) svgEl.style.background = ''
   }
 }
 
@@ -75,9 +128,14 @@ const useUIStore = create((set, get) => ({
 
   // --- Theme ---
   theme: 'dark',
-  setTheme: (theme) => {
-    applyTheme(theme)
-    set({ theme })
+  setTheme: (newTheme) => {
+    const prev = get().theme
+    const resolve = (t) => t === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : t
+    invertShapeColors(resolve(prev), resolve(newTheme))
+    applyTheme(newTheme)
+    set({ theme: newTheme })
   },
 }))
 

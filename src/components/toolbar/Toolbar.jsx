@@ -3,6 +3,10 @@
 import useSketchStore, { TOOLS } from '@/store/useSketchStore'
 import useUIStore from '@/store/useUIStore'
 
+const VIEW_MODE_ITEMS = [
+  { tool: TOOLS.PAN, icon: 'bxs-hand', title: 'Pan (H)' },
+]
+
 const TOOL_ITEMS = [
   { tool: TOOLS.PAN, icon: 'bxs-hand', title: 'Pan (H)' },
   { tool: TOOLS.SELECT, icon: 'bxs-pointer', title: 'Select (V)' },
@@ -25,11 +29,16 @@ const TOOL_ITEMS = [
 export default function Toolbar() {
   const activeTool = useSketchStore((s) => s.activeTool)
   const setActiveTool = useSketchStore((s) => s.setActiveTool)
+  const viewMode = useSketchStore((s) => s.viewMode)
   const toggleAIModal = useUIStore((s) => s.toggleAIModal)
 
+  const items = viewMode ? VIEW_MODE_ITEMS : TOOL_ITEMS
+  const topOffset = viewMode ? 'top-4' : 'top-[60px]'
+
   return (
-    <div className="absolute top-[60px] left-2.5 w-[46px] rounded-xl bg-surface z-[1000] flex flex-col items-center py-1.5 gap-0.5 font-[lixFont]">
-      {TOOL_ITEMS.map((item, idx) => {
+    <>
+    <div className={`absolute ${topOffset} left-2.5 w-[46px] rounded-xl bg-surface z-[1000] flex flex-col items-center py-1.5 gap-0.5 font-[lixFont]`}>
+      {items.map((item, idx) => {
         if (item === 'spacer') {
           return (
             <div
@@ -85,5 +94,14 @@ export default function Toolbar() {
         )
       })}
     </div>
+    {viewMode && (
+      <div className="absolute top-16 left-2.5 w-[46px] z-[1000] flex justify-center font-[lixFont]">
+        <span className="text-text-dim text-[9px] text-center leading-tight">
+          View<br/>Mode<br/>
+          <kbd className="text-[8px] text-text-muted">Esc</kbd>
+        </span>
+      </div>
+    )}
+    </>
   )
 }

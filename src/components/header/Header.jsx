@@ -1,6 +1,7 @@
 "use client"
 
 import useUIStore from '@/store/useUIStore'
+import useSketchStore from '@/store/useSketchStore'
 
 export default function Header() {
   const workspaceName = useUIStore((s) => s.workspaceName)
@@ -8,6 +9,10 @@ export default function Header() {
   const toggleMenu = useUIStore((s) => s.toggleMenu)
   const toggleCommandPalette = useUIStore((s) => s.toggleCommandPalette)
   const toggleHelpModal = useUIStore((s) => s.toggleHelpModal)
+  const viewMode = useSketchStore((s) => s.viewMode)
+  const zenMode = useSketchStore((s) => s.zenMode)
+
+  if (viewMode || zenMode) return null
 
   return (
     <header className="fixed top-0 left-0 right-0 h-12 bg-surface-dark border-b border-[#2c2c35] z-[1001] flex items-center justify-between px-3 font-[lixFont]">

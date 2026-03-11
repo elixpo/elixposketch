@@ -44,7 +44,18 @@ export default function AppMenu() {
   const gridEnabled = useSketchStore((s) => s.gridEnabled)
   const toggleGrid = useSketchStore((s) => s.toggleGrid)
 
+  const viewMode = useSketchStore((s) => s.viewMode)
+  const zenMode = useSketchStore((s) => s.zenMode)
+  const toolLock = useSketchStore((s) => s.toolLock)
+  const snapToObjects = useSketchStore((s) => s.snapToObjects)
+  const toggleViewMode = useSketchStore((s) => s.toggleViewMode)
+  const toggleZenMode = useSketchStore((s) => s.toggleZenMode)
+  const toggleToolLock = useSketchStore((s) => s.toggleToolLock)
+  const toggleSnapToObjects = useSketchStore((s) => s.toggleSnapToObjects)
+
   const [prefsOpen, setPrefsOpen] = useState(false)
+
+  if (viewMode || zenMode) return null
 
   const handleOpen = () => {
     const serializer = window.__sceneSerializer
@@ -164,28 +175,41 @@ export default function AppMenu() {
           {/* Preferences submenu */}
           {prefsOpen && (
             <div className="absolute right-full top-0 mr-2 w-[250px] bg-surface/90 backdrop-blur-lg rounded-xl border border-border-light p-2 font-[lixFont]">
-              {PREFERENCE_ITEMS.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.id === 'toggleGrid') toggleGrid()
-                  }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    {item.toggle && (
-                      <i className="bx bx-check text-sm text-accent-blue" />
+              {PREFERENCE_ITEMS.map((item) => {
+                const isActive =
+                  (item.id === 'toolLock' && toolLock) ||
+                  (item.id === 'snapObjects' && snapToObjects) ||
+                  (item.id === 'toggleGrid' && gridEnabled) ||
+                  (item.id === 'zenMode' && zenMode) ||
+                  (item.id === 'viewMode' && viewMode) ||
+                  (item.toggle) // arrow binding, snap midpoints default on
+
+                const handleClick = () => {
+                  if (item.id === 'toolLock') toggleToolLock()
+                  else if (item.id === 'snapObjects') toggleSnapToObjects()
+                  else if (item.id === 'toggleGrid') toggleGrid()
+                  else if (item.id === 'zenMode') { toggleZenMode(); closeMenu() }
+                  else if (item.id === 'viewMode') { toggleViewMode(); closeMenu() }
+                }
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={handleClick}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+                  >
+                    <span className="flex items-center gap-2">
+                      {isActive && (
+                        <i className="bx bx-check text-sm text-accent-blue" />
+                      )}
+                      {item.label}
+                    </span>
+                    {item.shortcut && (
+                      <span className="text-text-dim text-xs">{item.shortcut}</span>
                     )}
-                    {!item.toggle && item.id === 'toggleGrid' && gridEnabled && (
-                      <i className="bx bx-check text-sm text-accent-blue" />
-                    )}
-                    {item.label}
-                  </span>
-                  {item.shortcut && (
-                    <span className="text-text-dim text-xs">{item.shortcut}</span>
-                  )}
-                </button>
-              ))}
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>

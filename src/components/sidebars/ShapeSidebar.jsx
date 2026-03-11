@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react'
+import useSketchStore from '@/store/useSketchStore'
 
 /**
  * A toolbar button that opens a popover panel above it on click.
@@ -61,10 +62,13 @@ function Divider() {
  * Bottom toolbar container - appears when tool/shape is active
  */
 export default function ShapeSidebar({ visible, children }) {
+  const viewMode = useSketchStore((s) => s.viewMode)
+  const show = visible && !viewMode
+
   return (
     <div
       className={`absolute bottom-14 left-1/2 -translate-x-1/2 bg-[#1c1c1c] border border-white/[0.1] rounded-xl px-2 py-1.5 z-[999] font-[lixFont] transition-all duration-200 ${
-        visible
+        show
           ? 'opacity-100 pointer-events-auto translate-y-0'
           : 'opacity-0 pointer-events-none translate-y-2'
       }`}
