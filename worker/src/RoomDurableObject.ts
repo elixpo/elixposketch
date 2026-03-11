@@ -48,12 +48,13 @@ export class RoomDurableObject {
     const userId = url.searchParams.get('userId') || `guest-${crypto.randomUUID().slice(0, 8)}`;
     const displayName = decodeParam(url.searchParams.get('displayName') || '');
     const avatar = url.searchParams.get('avatar') || '';
+    const workspaceName = decodeParam(url.searchParams.get('workspaceName') || 'Untitled');
     const clientIp = request.headers.get('CF-Connecting-IP') || 'unknown';
 
     // Get or initialize room
     const roomId = url.pathname.split('/room/')[1];
     if (!this.roomState) {
-      await this.initRoom(roomId, userId, clientIp);
+      await this.initRoom(roomId, userId, clientIp, workspaceName);
     }
 
     // Check room status
@@ -237,7 +238,7 @@ export class RoomDurableObject {
 
   // --- Private helpers ---
 
-  private async initRoom(roomId: string, ownerId: string, ownerIp: string): Promise<void> {
+  private async initRoom(roomId: string, ownerId: string, ownerIp: string, workspaceName: string = 'Untitled'): Promise<void> {
     const ttlHours = parseInt(this.env.ROOM_TTL_HOURS || '3');
     const now = new Date();
     const expiresAt = new Date(now.getTime() + ttlHours * 3600 * 1000);
@@ -253,9 +254,9 @@ export class RoomDurableObject {
     // Persist to D1
     try {
       await this.env.DB.prepare(
-        `INSERT OR IGNORE INTO rooms (id, owner_user_id, owner_ip, created_at, expires_at, status)
-         VALUES (?, ?, ?, ?, ?, 'active')`
-      ).bind(roomId, ownerId, ownerIp, now.toISOString(), expiresAt.toISOString()).run();
+        `INSERT OR IGNORE INTO rooms (id, owner_user_id, owner_ip, workspace_name, created_at, expires_at, status)
+         VALUES (?, ?, ?, ?, ?, ?, 'active')`
+      ).bind(roomId, ownerId, ownerIp, workspaceName, now.toISOString(), expiresAt.toISOString()).run();
     } catch {
       // Room may already exist from a previous session
     }
