@@ -80,7 +80,7 @@ export default function SaveModal() {
         return
       }
 
-      const sceneData = serializer.saveScene()
+      const sceneData = serializer.save()
       const sceneJson = JSON.stringify(sceneData)
       const encryptedData = await encrypt(sceneJson, key)
 

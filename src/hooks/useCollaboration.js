@@ -143,7 +143,7 @@ export default function useCollaboration(roomId) {
           // Another user needs our scene state
           const serializer = window.__sceneSerializer
           if (serializer) {
-            const sceneData = serializer.saveScene()
+            const sceneData = serializer.save()
             ws.send(JSON.stringify({
               type: 'sync-response',
               targetUserId: msg.requestedBy,
@@ -159,7 +159,7 @@ export default function useCollaboration(roomId) {
           if (serializer && msg.payload) {
             try {
               const sceneData = JSON.parse(msg.payload)
-              serializer.loadScene(sceneData)
+              serializer.load(sceneData)
               console.log('[Collab] Scene synced from peer')
             } catch (e) {
               console.error('[Collab] Failed to load synced scene:', e)
