@@ -85,9 +85,9 @@ export async function POST(request) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gemini-fast',
+        model: 'claude-fast',
         messages,
-        temperature: 0.2,
+        temperature: 0.3,
       }),
       signal: controller.signal,
     })
