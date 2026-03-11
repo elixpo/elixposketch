@@ -9,6 +9,7 @@ export interface Env {
   ROOM_TTL_HOURS: string;
   IDLE_TIMEOUT_MINS: string;
   ELIXPO_AUTH_URL: string;
+  APP_ORIGIN: string;
   ELIXPO_CLIENT_ID: string;
   ELIXPO_CLIENT_SECRET: string;
   CLOUDINARY_KEY: string;
@@ -93,13 +94,15 @@ async function handleAuthCallback(request: Request, env: Env): Promise<Response>
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
   const error = url.searchParams.get('error');
+  // The app origin to redirect back to after auth
+  const appOrigin = url.searchParams.get('app_origin') || env.APP_ORIGIN || 'http://localhost:3000';
 
   if (error) {
-    return json({ error, error_description: url.searchParams.get('error_description') }, 400);
+    return Response.redirect(`${appOrigin}?auth_error=${encodeURIComponent(error)}`, 302);
   }
 
   if (!code) {
-    return json({ error: 'Missing authorization code' }, 400);
+    return Response.redirect(`${appOrigin}?auth_error=missing_code`, 302);
   }
 
   // Determine redirect URI (same as what was used for the authorize request)
@@ -190,17 +193,19 @@ async function handleAuthCallback(request: Request, env: Env): Promise<Response>
     expirationTtl: 86400,
   });
 
-  // Return session token and user info
-  return json({
-    sessionToken,
-    user: {
-      id: profile.id,
-      email: profile.email,
-      displayName: profile.displayName,
-      avatar: profile.avatar,
-      isAdmin: profile.isAdmin,
-    },
-  });
+  // Redirect back to app with session token and user info
+  const userParam = encodeURIComponent(JSON.stringify({
+    id: profile.id,
+    email: profile.email,
+    displayName: profile.displayName,
+    avatar: profile.avatar,
+    isAdmin: profile.isAdmin,
+  }));
+
+  return Response.redirect(
+    `${appOrigin}?auth_token=${sessionToken}&auth_user=${userParam}`,
+    302
+  );
 }
 
 async function handleAuthMe(request: Request, env: Env): Promise<Response> {
