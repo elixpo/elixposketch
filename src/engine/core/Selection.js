@@ -1695,10 +1695,77 @@ function deleteSelectedShapes() {
     });
 }
 
+/**
+ * Create a frame around all currently multi-selected shapes.
+ */
+function frameSelectedShapes() {
+    if (multiSelection.selectedShapes.size < 2) return;
+
+    const bounds = multiSelection.getBounds();
+    if (!bounds) return;
+
+    const padding = 20;
+    const fx = bounds.x - padding;
+    const fy = bounds.y - padding;
+    const fw = bounds.width + padding * 2;
+    const fh = bounds.height + padding * 2;
+
+    // Import Frame class dynamically (it's on window from SketchEngine init)
+    const FrameClass = window.Frame;
+    if (!FrameClass) {
+        console.warn('[Selection] Frame class not available');
+        return;
+    }
+
+    const frame = new FrameClass(fx, fy, fw, fh);
+    shapes.push(frame);
+
+    // Push undo action for frame creation
+    if (window.historyStack) {
+        window.historyStack.push({
+            type: window.ACTION_CREATE || 'create',
+            shape: frame,
+            shapeName: 'frame'
+        });
+    }
+
+    // Add each selected shape into the frame
+    const shapesToFrame = Array.from(multiSelection.selectedShapes);
+    multiSelection.clearSelection();
+
+    for (const shape of shapesToFrame) {
+        frame.addShapeToFrame(shape);
+    }
+
+    // Reorder DOM: frame group should be behind the contained shapes
+    const frameEl = frame.group;
+    if (frameEl && frameEl.parentNode) {
+        // Move frame before its first contained shape in the shapes array
+        const frameIdx = shapes.indexOf(frame);
+        if (frameIdx > 0) {
+            shapes.splice(frameIdx, 1);
+            // Find earliest contained shape index
+            let earliest = shapes.length;
+            for (const s of shapesToFrame) {
+                const idx = shapes.indexOf(s);
+                if (idx >= 0 && idx < earliest) earliest = idx;
+            }
+            shapes.splice(earliest, 0, frame);
+        }
+    }
+
+    // Select the new frame
+    if (typeof frame.selectFrame === 'function') {
+        frame.selectFrame();
+    }
+    currentShape = frame;
+}
+
 // Expose for plain scripts (sketchGeneric.js is not a module)
 window.clearAllSelections = clearAllSelections;
 window.multiSelection = multiSelection;
 window.deleteSelectedShapes = deleteSelectedShapes;
+window.frameSelectedShapes = frameSelectedShapes;
 
 export {
     handleMultiSelectionMouseDown,
