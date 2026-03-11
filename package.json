@@ -22,9 +22,9 @@
     "start": "next start",
     "worker:dev": "wrangler dev",
     "worker:deploy": "wrangler deploy",
-    "db:create": "wrangler d1 create lixsketch-db",
-    "db:migrate": "wrangler d1 execute lixsketch-db --file=./worker/migrations/0001_initial_schema.sql",
-    "db:migrate:local": "wrangler d1 execute lixsketch-db --local --file=./worker/migrations/0001_initial_schema.sql",
-    "kv:create": "wrangler kv namespace create LIXSKETCH_KV"
+    "db:create": "wrangler d1 create lixsketch",
+    "db:migrate": "wrangler d1 execute lixsketch --file=./worker/migrations/0001_initial_schema.sql",
+    "db:migrate:local": "wrangler d1 execute lixsketch --local --file=./worker/migrations/0001_initial_schema.sql",
+    "kv:create": "wrangler kv namespace create lixsketch"
   }
 }
