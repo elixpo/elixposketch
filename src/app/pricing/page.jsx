@@ -20,6 +20,7 @@ const PLANS = [
       'All shape & drawing tools',
       'PNG, SVG, PDF export',
       'LixScript diagrams',
+      '10 AI requests / day',
       '5 MB image limit per room',
       '1 shared link at a time',
       'Community support',
@@ -38,6 +39,7 @@ const PLANS = [
     features: [
       'Everything in Free',
       'Up to 3 cloud workspaces',
+      '50 AI requests / day',
       'Unlimited shared links',
       'Real-time collaboration (up to 10)',
       'Cloud auto-save & history',
@@ -58,6 +60,7 @@ const PLANS = [
     features: [
       'Everything in Pro',
       'Unlimited workspaces',
+      'Unlimited AI requests',
       'Unlimited collaborators',
       'Team workspaces & permissions',
       'Admin dashboard & analytics',

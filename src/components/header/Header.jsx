@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import useUIStore from '@/store/useUIStore'
 import useSketchStore from '@/store/useSketchStore'
 import useAuthStore from '@/store/useAuthStore'
@@ -82,15 +83,44 @@ function ProfileDropdown() {
             </div>
           </div>
 
-          {isGuest && (
-            <button
-              onClick={() => { regenerateProfile(); setOpen(false) }}
+          <div className="border-t border-white/[0.06] mt-2 pt-2 flex flex-col gap-0.5">
+            <Link
+              href="/profile"
+              onClick={() => setOpen(false)}
               className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
             >
-              <i className="bx bx-refresh text-sm" />
-              New identity
-            </button>
-          )}
+              <i className="bx bx-user text-sm" />
+              Profile & Usage
+            </Link>
+
+            {isGuest && (
+              <button
+                onClick={() => { regenerateProfile(); setOpen(false) }}
+                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-text-secondary text-xs hover:bg-surface-hover transition-all duration-200"
+              >
+                <i className="bx bx-refresh text-sm" />
+                New identity
+              </button>
+            )}
+
+            {isGuest ? (
+              <button
+                onClick={() => { useAuthStore.getState().login(); setOpen(false) }}
+                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-accent-blue text-xs hover:bg-accent-blue/10 transition-all duration-200"
+              >
+                <i className="bx bx-log-in text-sm" />
+                Sign in
+              </button>
+            ) : (
+              <button
+                onClick={() => { useAuthStore.getState().logout(); setOpen(false) }}
+                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-red-400/70 text-xs hover:bg-red-500/10 transition-all duration-200"
+              >
+                <i className="bx bx-log-out text-sm" />
+                Sign out
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
