@@ -16,6 +16,10 @@ ENV_FILE="$SCRIPT_DIR/.env"
 PAGES_PROJECT="lixsketch"
 PAGES_BRANCH="main"
 
+# D1 and KV binding IDs (must match wrangler.toml / next.config.mjs)
+D1_DB_ID="65fc6d04-d659-4cb6-b34c-750a763693e4"
+KV_ID="aa3a1466b15e443a8f0858c3b9a776c8"
+
 # ── Helpers ──────────────────────────────────────────────────
 
 load_env() {
@@ -66,7 +70,9 @@ deploy() {
   echo "==> Deploying to Cloudflare Pages ($PAGES_PROJECT)..."
   sudo npx wrangler pages deploy .vercel/output/static \
     --project-name "$PAGES_PROJECT" \
-    --branch "$PAGES_BRANCH"
+    --branch "$PAGES_BRANCH" \
+    --d1 "DB=$D1_DB_ID" \
+    --kv "KV=$KV_ID"
 
   echo "==> Pages deploy complete."
 }
