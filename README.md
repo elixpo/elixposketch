@@ -74,11 +74,11 @@ This is an open source project! If you find bugs on the platform, please let us 
 
 <div align="center">
 
-<a href="https://star-history.com/#elixpo/lixsketch&Date">
+<a href="https://star-history.com/#elixpo/lixsketch&Timeline">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=elixpo/lixsketch&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=elixpo/lixsketch&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=elixpo/lixsketch&type=Date&theme=dark" width="700" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=elixpo/lixsketch&type=Timeline&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=elixpo/lixsketch&type=Timeline" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=elixpo/lixsketch&type=Timeline&theme=dark" width="700" />
   </picture>
 </a>
 
