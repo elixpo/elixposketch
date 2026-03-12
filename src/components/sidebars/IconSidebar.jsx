@@ -183,7 +183,7 @@ export default function IconSidebar() {
             No icons found
           </div>
         ) : (
-          <div className="flex flex-row flex-wrap gap-0.5">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-0.5">
             {icons.map((icon, i) => (
               <IconCell
                 key={icon.filename || i}
