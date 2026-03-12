@@ -647,6 +647,103 @@ export function exportAsPDF() {
 }
 
 // ============================================================
+// RESET: Clear the entire canvas
+// ============================================================
+export function resetCanvas() {
+    const svgEl = window.svg;
+    if (!svgEl) return;
+
+    // Remove all shape DOM elements + frame clipGroups/clipPaths
+    const existingShapes = window.shapes || [];
+    existingShapes.forEach(shape => {
+        if (shape.shapeName === 'frame') {
+            if (shape.clipGroup && shape.clipGroup.parentNode) {
+                shape.clipGroup.parentNode.removeChild(shape.clipGroup);
+            }
+            if (shape.clipPath && shape.clipPath.parentNode) {
+                shape.clipPath.parentNode.removeChild(shape.clipPath);
+            }
+        }
+        if (shape.group && shape.group.parentNode) {
+            shape.group.parentNode.removeChild(shape.group);
+        } else if (shape.element && shape.element.parentNode) {
+            shape.element.parentNode.removeChild(shape.element);
+        }
+    });
+
+    // Remove selection UI
+    svgEl.querySelectorAll(
+        '.selection-outline, .resize-anchor, .rotation-anchor, [data-selection]'
+    ).forEach(el => el.remove());
+
+    window.shapes = [];
+    window.currentShape = null;
+    window.historyStack = [];
+    window.redoStack = [];
+
+    if (typeof window.clearAllSelections === 'function') {
+        window.clearAllSelections();
+    }
+    if (typeof window.disableAllSideBars === 'function') {
+        window.disableAllSideBars();
+    }
+
+    // Clear auto-save
+    try {
+        localStorage.removeItem('lixsketch-autosave');
+        localStorage.removeItem('lixsketch-autosave-meta');
+    } catch (_) {}
+
+    console.log('[SceneSerializer] Canvas reset');
+}
+
+// ============================================================
+// FIND: Search for text content on the canvas
+// ============================================================
+export function findTextOnCanvas(query) {
+    const allShapes = window.shapes || [];
+    if (!query || query.trim() === '') return [];
+
+    const lowerQuery = query.toLowerCase();
+    const results = [];
+
+    for (const shape of allShapes) {
+        let textContent = '';
+
+        if (shape.shapeName === 'text' || shape.shapeName === 'code') {
+            const group = shape.group;
+            if (group) {
+                // Get all text content from SVG text/tspan elements
+                const textEls = group.querySelectorAll('text, tspan');
+                textEls.forEach(el => {
+                    if (el.textContent) textContent += el.textContent + ' ';
+                });
+                // Also check foreignObject content
+                const foreignEls = group.querySelectorAll('foreignObject *');
+                foreignEls.forEach(el => {
+                    if (el.textContent) textContent += el.textContent + ' ';
+                });
+            }
+        } else if (shape.shapeName === 'frame') {
+            textContent = shape.frameName || '';
+        }
+
+        textContent = textContent.trim();
+        if (textContent && textContent.toLowerCase().includes(lowerQuery)) {
+            results.push({
+                shape,
+                text: textContent,
+                type: shape.shapeName,
+                x: shape.x || 0,
+                y: shape.y || 0,
+            });
+        }
+    }
+
+    return results;
+}
+
+// ============================================================
 // Initialize bridge for React components
 // ============================================================
 export function initSceneSerializer() {
@@ -659,5 +756,7 @@ export function initSceneSerializer() {
         exportPDF: exportAsPDF,
         copyAsPNG,
         copyAsSVG,
+        resetCanvas,
+        findText: findTextOnCanvas,
     };
 }
