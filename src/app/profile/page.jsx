@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
@@ -243,6 +243,12 @@ export default function ProfilePage() {
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true })
 
+  // Generate a fresh session ID for the "New" workspace button
+  const newSessionId = useMemo(
+    () => `lx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    []
+  )
+
   // Init auth on mount
   useEffect(() => { init() }, [init])
 
@@ -458,7 +464,7 @@ export default function ProfilePage() {
                 </h2>
                 {workspaces.length < (isAuthenticated ? 3 : 1) && (
                   <Link
-                    href="/c/new"
+                    href={`/c/${newSessionId}?new=1`}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-accent-blue border border-accent-blue/20 hover:bg-accent-blue/10 transition-all"
                   >
                     <i className="bx bx-plus text-sm" />
@@ -473,7 +479,7 @@ export default function ProfilePage() {
                     <i className="bx bx-folder-open text-3xl text-text-dim mb-2" />
                     <p className="text-text-dim text-sm mb-3">No workspaces yet</p>
                     <Link
-                      href="/c/new"
+                      href={`/c/${newSessionId}?new=1`}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-accent-blue hover:bg-accent-blue/80 text-white text-xs rounded-lg transition-all"
                     >
                       <i className="bx bx-pencil text-sm" />
