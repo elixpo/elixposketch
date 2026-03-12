@@ -1,10 +1,11 @@
+# LixSketch - The Canvas You Can Trust 🖌️
+> It was one of the most favourite projects of mine while development. It took me 11 months to come to the stage where I can write the README and product my mvp - [LixSketch](https://sketch.elixpo.com)
+
+
 <div align="center">
 
 <img src="https://sketch.elixpo.com/Images/logo.png" alt="LixSketch Logo" width="80" />
 
-# LixSketch
-
-**The Canvas You Can Trust**
 
 An open-source freemium platform for collaborative canvas — technical presentations, modelling, wireframes, and more.
 
@@ -18,7 +19,8 @@ An open-source freemium platform for collaborative canvas — technical presenta
 
 </div>
 
----
+
+### LixSketch is an open source freemium platfor for collaborative canvas for technical presentation / modelling on web + IDE + pwa (under development)
 
 <img width="1322" height="612" alt="og-image" src="https://github.com/user-attachments/assets/a96e85be-dce9-464c-8451-5513ad521dd6" />
 
