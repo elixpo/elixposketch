@@ -20,11 +20,11 @@ function IconCell({ icon, onClick }) {
     <button
       onClick={onClick}
       title={name}
-      className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-white/10 cursor-pointer transition-colors duration-100"
+      className="w-11 h-11 shrink-0 flex items-center justify-center rounded-lg hover:bg-white/10 cursor-pointer transition-colors duration-100"
     >
       {icon.svg ? (
         <div
-          className="w-6 h-6 pointer-events-none [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-white/90"
+          className="w-6 h-6 shrink-0 overflow-hidden pointer-events-none [&>svg]:w-full! [&>svg]:h-full! [&>svg]:max-w-full! [&>svg]:max-h-full! [&>svg]:fill-white/90"
           style={{ filter: 'brightness(0) invert(1)' }}
           dangerouslySetInnerHTML={{ __html: icon.svg }}
         />
@@ -183,7 +183,7 @@ export default function IconSidebar() {
             No icons found
           </div>
         ) : (
-          <div className="flex flex-wrap gap-0.5">
+          <div className="flex flex-row flex-wrap gap-0.5">
             {icons.map((icon, i) => (
               <IconCell
                 key={icon.filename || i}
