@@ -121,7 +121,7 @@ function addText(event) {
     textElement.setAttribute("font-size", textSize);
     textElement.setAttribute("font-family", textFont);
     textElement.setAttribute("text-anchor", textAlignElement);
-    textElement.setAttribute("cursor", "text");
+    textElement.setAttribute("cursor", "default");
     textElement.setAttribute("white-space", "pre");
     textElement.setAttribute("dominant-baseline", "hanging");
     textElement.textContent = "";
@@ -330,6 +330,10 @@ function makeTextEditable(textElement, groupElement) {
     document.addEventListener('mousedown', handleClickOutside, true);
     input.handleClickOutside = handleClickOutside;
 
+    // Set text cursor on the element during edit mode
+    const textEl = groupElement.querySelector('text');
+    if (textEl) textEl.setAttribute("cursor", "text");
+
     groupElement.style.display = "none";
 }
 
@@ -346,6 +350,9 @@ function renderText(input, textElement, deleteIfEmpty = false) {
     }
 
     document.body.removeChild(input);
+
+    // Reset cursor back to default after edit mode ends
+    if (textElement) textElement.setAttribute("cursor", "default");
 
     if (!gElement || !textElement) {
         return;
@@ -1246,12 +1253,12 @@ const handleTextMouseMove = function (e) {
         if (targetGroup) {
             svg.style.cursor = 'pointer';
         } else {
-            svg.style.cursor = 'text';
+            svg.style.cursor = 'crosshair';
         }
     } else if (isSelectionToolActive) {
         const targetGroup = e.target.closest('g[data-type="text-group"]');
         if (targetGroup) {
-            svg.style.cursor = 'pointer';
+            svg.style.cursor = 'default';
         }
     }
 
@@ -1600,7 +1607,7 @@ function convertTextToCode(textGroupElement) {
     codeElement.setAttribute("font-size", fontSize);
     codeElement.setAttribute("font-family", "lixCode");
     codeElement.setAttribute("text-anchor", "start");
-    codeElement.setAttribute("cursor", "text");
+    codeElement.setAttribute("cursor", "default");
     codeElement.setAttribute("white-space", "pre");
     codeElement.setAttribute("dominant-baseline", "hanging");
     codeElement.setAttribute("data-language", getCodeLanguage());
@@ -1679,7 +1686,7 @@ function convertCodeToText(codeGroupElement) {
     textElement.setAttribute("font-size", fontSize);
     textElement.setAttribute("font-family", textFont);
     textElement.setAttribute("text-anchor", "start");
-    textElement.setAttribute("cursor", "text");
+    textElement.setAttribute("cursor", "default");
     textElement.setAttribute("white-space", "pre");
     textElement.setAttribute("dominant-baseline", "hanging");
     textElement.setAttribute("data-type", "text");
