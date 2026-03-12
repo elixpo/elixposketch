@@ -70,10 +70,10 @@ const PLANS = [
 
 function DotGrid() {
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-50" width="100%" height="100%">
+    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-60" width="100%" height="100%">
       <defs>
         <pattern id="pricing-dot-grid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-          <circle cx="12" cy="12" r="0.8" fill="rgba(139, 136, 232, 0.18)" />
+          <circle cx="12" cy="12" r="0.9" fill="rgba(139, 136, 232, 0.22)" />
         </pattern>
       </defs>
       <rect width="100%" height="100%" fill="url(#pricing-dot-grid)" />
@@ -102,28 +102,31 @@ function MarginDoodles() {
       const ctx = canvas.getContext('2d')
       ctx.scale(2, 2)
 
-      const opts = { stroke: 'rgba(139,136,232,0.07)', strokeWidth: 1, roughness: 2 }
+      const purple = { stroke: 'rgba(139,136,232,0.12)', strokeWidth: 1, roughness: 2 }
+      const pink = { stroke: 'rgba(217,155,240,0.10)', strokeWidth: 1, roughness: 2 }
+      const blue = { stroke: 'rgba(74,144,217,0.10)', strokeWidth: 1, roughness: 2 }
 
       // Scattered shapes around the margins
-      rc.circle(60, 120, 30, opts)
-      rc.rectangle(w - 90, 200, 40, 40, opts)
-      rc.line(30, 350, 80, 380, opts)
-      rc.circle(w - 50, 450, 20, opts)
-      rc.rectangle(40, 600, 25, 25, { ...opts, stroke: 'rgba(217,155,240,0.06)' })
-      rc.line(w - 70, 700, w - 30, 720, { ...opts, stroke: 'rgba(74,144,217,0.07)' })
-      rc.circle(70, 850, 18, { ...opts, stroke: 'rgba(217,155,240,0.06)' })
-      rc.rectangle(w - 80, 950, 30, 30, opts)
-      rc.line(50, 1100, 90, 1080, opts)
-      rc.circle(w - 60, 1200, 24, { ...opts, stroke: 'rgba(74,144,217,0.07)' })
+      rc.circle(60, 120, 35, purple)
+      rc.rectangle(w - 90, 180, 45, 45, pink)
+      rc.line(30, 340, 85, 375, blue)
+      rc.circle(w - 55, 440, 24, purple)
+      rc.rectangle(45, 580, 30, 30, pink)
+      rc.line(w - 75, 680, w - 25, 710, blue)
+      rc.circle(65, 820, 22, pink)
+      rc.rectangle(w - 85, 920, 35, 35, purple)
+      rc.line(45, 1060, 100, 1045, purple)
+      rc.circle(w - 60, 1160, 28, blue)
 
       // Small crosses
       const cross = (cx, cy, s, o) => {
         rc.line(cx - s, cy, cx + s, cy, o)
         rc.line(cx, cy - s, cx, cy + s, o)
       }
-      cross(w - 40, 140, 8, opts)
-      cross(50, 480, 6, opts)
-      cross(w - 55, 800, 7, { ...opts, stroke: 'rgba(217,155,240,0.06)' })
+      cross(w - 45, 130, 10, purple)
+      cross(55, 470, 8, pink)
+      cross(w - 55, 780, 9, blue)
+      cross(80, 1000, 7, purple)
     }
     draw()
   }, [])
@@ -136,9 +139,25 @@ function MarginDoodles() {
 function AmbientGlow() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] rounded-full bg-[#8B88E8]/[0.04] blur-[120px]" />
-      <div className="absolute top-1/3 -right-20 w-[400px] h-[400px] rounded-full bg-[#D99BF0]/[0.03] blur-[100px]" />
-      <div className="absolute bottom-20 left-10 w-[350px] h-[350px] rounded-full bg-[#4A90D9]/[0.03] blur-[100px]" />
+      {/* Large hero glow behind cards */}
+      <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-[#8B88E8]/[0.06] blur-[150px]" />
+
+      {/* Left purple blob */}
+      <div className="absolute -top-20 -left-32 w-[600px] h-[600px] rounded-full bg-[#8B88E8]/[0.05] blur-[130px]" />
+
+      {/* Right pink blob */}
+      <div className="absolute top-[20%] -right-40 w-[500px] h-[500px] rounded-full bg-[#D99BF0]/[0.06] blur-[120px]" />
+
+      {/* Mid-left blue accent */}
+      <div className="absolute top-[45%] left-[5%] w-[400px] h-[400px] rounded-full bg-[#4A90D9]/[0.05] blur-[110px]" />
+
+      {/* Bottom center warm glow */}
+      <div className="absolute bottom-[10%] left-1/2 -translate-x-1/3 w-[700px] h-[350px] rounded-full bg-[#D99BF0]/[0.04] blur-[130px]" />
+
+      {/* Small vivid accent blobs */}
+      <div className="absolute top-[30%] left-[20%] w-[200px] h-[200px] rounded-full bg-[#8B88E8]/[0.08] blur-[80px]" />
+      <div className="absolute top-[35%] right-[15%] w-[180px] h-[180px] rounded-full bg-[#4A90D9]/[0.07] blur-[70px]" />
+      <div className="absolute bottom-[25%] right-[25%] w-[220px] h-[220px] rounded-full bg-[#D99BF0]/[0.06] blur-[80px]" />
     </div>
   )
 }
