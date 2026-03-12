@@ -129,7 +129,6 @@ export default function useAutoSave() {
               useUIStore.getState().setWorkspaceName(workspaceName)
             }
           }
-        }
           // Mark as locally saved, then sync to cloud
           useUIStore.getState().setSaveStatus('local')
           // Trigger cloud sync after restore
