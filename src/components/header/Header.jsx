@@ -133,15 +133,10 @@ function SaveStatusDot() {
 
   const isCloud = saveStatus === 'cloud'
   return (
-    <div
-      className="flex items-center gap-1 px-1.5 py-0.5 rounded-md select-none cursor-default"
-      title={isCloud ? 'Synced to cloud' : 'Saved locally'}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full ${isCloud ? 'bg-green-400' : 'bg-yellow-400'}`} />
-      <span className="text-text-dim text-[10px]">
-        {isCloud ? 'Synced' : 'Local'}
-      </span>
-    </div>
+    <span
+      className={`w-2 h-2 rounded-full shrink-0 transition-colors duration-300 ${isCloud ? 'bg-green-400' : 'bg-yellow-400'}`}
+      title={isCloud ? 'All changes synced to cloud' : 'Changes saved locally — pending cloud sync'}
+    />
   )
 }
 
@@ -197,12 +192,12 @@ export default function Header() {
           spellCheck={false}
         />
 
-        {/* Save status indicator */}
-        <SaveStatusDot />
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-2">
+        {/* Save status dot */}
+        <SaveStatusDot />
         {/* E2E Shield badge */}
         <div
           className="flex items-center gap-1 px-2 py-1 rounded-md bg-green-500/10 text-green-400/80 cursor-default select-none"

@@ -144,6 +144,42 @@ export default function useAutoSave() {
     setTimeout(tryRestore, 1000)
   }, [isInRoom])
 
+  // Mark as 'local' immediately when the user changes the canvas after a cloud sync
+  useEffect(() => {
+    if (isInRoom) return
+
+    const markDirty = () => {
+      const status = useUIStore.getState().saveStatus
+      if (status === 'cloud') {
+        useUIStore.getState().setSaveStatus('local')
+      }
+    }
+
+    // Use MutationObserver on SVG to detect shape additions/removals/edits
+    const waitForSvg = () => {
+      const svg = window.svg
+      if (!svg) { setTimeout(waitForSvg, 500); return }
+
+      const observer = new MutationObserver(markDirty)
+      observer.observe(svg, { childList: true, subtree: true, attributes: true })
+
+      // Also catch mouseup (end of drawing/dragging) for immediate feedback
+      svg.addEventListener('mouseup', markDirty)
+
+      observerRef.current = { observer, svg }
+    }
+
+    const observerRef = { current: null }
+    waitForSvg()
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.observer.disconnect()
+        observerRef.current.svg.removeEventListener('mouseup', markDirty)
+      }
+    }
+  }, [isInRoom])
+
   // Periodic auto-save to localStorage
   useEffect(() => {
     if (isInRoom) return // skip in collab rooms
