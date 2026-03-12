@@ -52,17 +52,35 @@ document.getElementById("importImage")?.addEventListener('click', () => {
     // Add the input to the document temporarily
     document.body.appendChild(fileInput);
     
+    let fileSelected = false;
+
     // Handle file selection
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
+            fileSelected = true;
             handleImageUpload(file);
         }
-        
-        // Clean up - remove the input element
         document.body.removeChild(fileInput);
     });
-    
+
+    // Detect cancel
+    const onFocus = () => {
+        window.removeEventListener('focus', onFocus);
+        setTimeout(() => {
+            if (!fileSelected) {
+                isImageToolActive = false;
+                if (window.__sketchEngine?.setActiveTool) {
+                    window.__sketchEngine.setActiveTool('select');
+                }
+                if (fileInput.parentNode) {
+                    document.body.removeChild(fileInput);
+                }
+            }
+        }, 300);
+    };
+    window.addEventListener('focus', onFocus);
+
     // Trigger the file picker
     fileInput.click();
 });
@@ -475,15 +493,12 @@ function addSelectionOutline() {
 }
 
 function removeSelectionOutline() {
-    // Remove the selection outline
-    const outline = svg.querySelector(".selection-outline");
-    if (outline) {
-        svg.removeChild(outline);
-    }
+    // Remove ALL selection outlines (querySelectorAll to prevent stacking)
+    svg.querySelectorAll(".selection-outline").forEach(el => el.remove());
 
     // Remove resize anchors
     removeResizeAnchors();
-    
+
     // Remove rotation anchor
     removeRotationAnchor();
 
@@ -566,10 +581,7 @@ function addRotationAnchor(x, y, width, height, centerX, centerY) {
 }
 
 function removeRotationAnchor() {
-    const rotationAnchor = svg.querySelector(".rotation-anchor");
-    if (rotationAnchor) {
-        svg.removeChild(rotationAnchor);
-    }
+    svg.querySelectorAll(".rotation-anchor").forEach(el => el.remove());
 }
 
 function addAnchor(x, y, cursor) {
@@ -1090,6 +1102,23 @@ function deleteCurrentImage() {
         const freedBytes = selectedImage.__fileSize || 0;
         window.__roomImageBytesUsed = Math.max(0, (window.__roomImageBytesUsed || 0) - freedBytes);
 
+        // If image is hosted on Cloudinary, delete it from storage
+        const imgHref = selectedImage.getAttribute('href') || selectedImage.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || '';
+        if (imgHref.includes('cloudinary.com') || imgHref.includes('res.cloudinary')) {
+            const match = imgHref.match(/\/upload\/(?:v\d+\/)?(lixsketch\/.+?)(?:\.\w+)?$/);
+            if (match) {
+                const publicId = match[1];
+                const workerUrl = window.__WORKER_URL;
+                if (workerUrl) {
+                    fetch(`${workerUrl}/api/images/delete`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ publicId }),
+                    }).catch(err => console.warn('[ImageTool] Cloudinary cleanup failed:', err));
+                }
+            }
+        }
+
         // Find the ImageShape wrapper
         let imageShape = null;
         if (typeof shapes !== 'undefined' && Array.isArray(shapes)) {
@@ -1140,13 +1169,37 @@ window.openImageFilePicker = function() {
     fileInput.accept = 'image/*';
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
+
+    let fileSelected = false;
+
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
+            fileSelected = true;
             handleImageUpload(file);
         }
         document.body.removeChild(fileInput);
     });
+
+    // Detect cancel: when focus returns to window without a file being selected
+    const onFocus = () => {
+        window.removeEventListener('focus', onFocus);
+        // Delay to let 'change' fire first if a file was selected
+        setTimeout(() => {
+            if (!fileSelected) {
+                // User cancelled — switch back to select tool
+                isImageToolActive = false;
+                if (window.__sketchEngine?.setActiveTool) {
+                    window.__sketchEngine.setActiveTool('select');
+                }
+                if (fileInput.parentNode) {
+                    document.body.removeChild(fileInput);
+                }
+            }
+        }, 300);
+    };
+    window.addEventListener('focus', onFocus);
+
     fileInput.click();
 };
 
