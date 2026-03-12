@@ -135,7 +135,7 @@ function SaveStatusDot() {
   return (
     <span
       className={`w-2 h-2 rounded-full shrink-0 transition-colors duration-300 ${isCloud ? 'bg-green-400' : 'bg-yellow-400'}`}
-      title={isCloud ? 'All changes synced to cloud' : 'Changes saved locally — pending cloud sync'}
+      title={isCloud ? 'Synced to cloud — Ctrl+S to force sync' : 'Saved locally — auto-syncs every 10min or press Ctrl+S'}
     />
   )
 }
