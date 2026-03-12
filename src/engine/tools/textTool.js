@@ -659,6 +659,14 @@ function selectElement(groupElement) {
     updateSelectedElement(selectedElement);
     updateCodeToggleForShape('text');
 
+    // Update global currentShape so EventDispatcher can route to other tools later
+    if (typeof shapes !== 'undefined' && Array.isArray(shapes)) {
+        const wrapper = shapes.find(s => s.element === groupElement || s.group === groupElement);
+        if (wrapper) {
+            currentShape = wrapper;
+        }
+    }
+
     // Show text property panel when text is selected
     if (window.__showSidebarForShape) window.__showSidebarForShape('text');
 }
@@ -680,6 +688,11 @@ function deselectElement() {
         selectedElement = null;
 
         updateSelectedElement(null);
+
+        // Clear global currentShape if it was a text shape
+        if (currentShape && (currentShape.shapeName === 'text' || currentShape.shapeName === 'code')) {
+            currentShape = null;
+        }
 
         // Hide text property panel if we're in selection mode (not text tool)
         if (isSelectionToolActive) {
