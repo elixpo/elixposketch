@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import useAuthStore from '@/store/useAuthStore'
+import { useProfileStore } from '@/hooks/useGuestProfile'
 import { WORKER_URL } from '@/lib/env'
 
 // ── Dot grid background ──────────────────────────────────────────────────────
@@ -219,7 +220,8 @@ export default function ProfilePage() {
         if (isAuthenticated && user?.id) {
           params.set('userId', user.id)
         } else {
-          const guestId = localStorage.getItem('lixsketch-guest-session')
+          const profile = useProfileStore.getState().profile
+          const guestId = profile?.id || localStorage.getItem('lixsketch-guest-session')
           if (guestId) params.set('guestId', guestId)
           else { setLoading(false); return }
         }
