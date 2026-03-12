@@ -9,8 +9,17 @@ import { getSessionID } from '@/hooks/useSessionID'
 import { encrypt, generateKey } from '@/utils/encryption'
 import { useProfileStore } from '@/hooks/useGuestProfile'
 
-const LOCAL_SAVE_KEY = 'lixsketch-autosave'
-const LOCAL_SAVE_META_KEY = 'lixsketch-autosave-meta'
+const LOCAL_SAVE_KEY_PREFIX = 'lixsketch-autosave'
+const LOCAL_SAVE_META_KEY_PREFIX = 'lixsketch-autosave-meta'
+
+function getLocalSaveKey() {
+  const sessionId = window.__sessionID
+  return sessionId ? `${LOCAL_SAVE_KEY_PREFIX}-${sessionId}` : LOCAL_SAVE_KEY_PREFIX
+}
+function getLocalSaveMetaKey() {
+  const sessionId = window.__sessionID
+  return sessionId ? `${LOCAL_SAVE_META_KEY_PREFIX}-${sessionId}` : LOCAL_SAVE_META_KEY_PREFIX
+}
 const SAVE_INTERVAL = 10_000 // 10 seconds
 const CLOUD_SYNC_INTERVAL = 10 * 60_000 // 10 minutes
 
@@ -106,7 +115,8 @@ export default function useAutoSave() {
         return
       }
 
-      const saved = localStorage.getItem(LOCAL_SAVE_KEY)
+      // Try session-scoped key first, then fall back to legacy global key
+      const saved = localStorage.getItem(getLocalSaveKey()) || localStorage.getItem('lixsketch-autosave')
       if (!saved) {
         hasRestored.current = true
         return
@@ -114,15 +124,12 @@ export default function useAutoSave() {
 
       try {
         const sceneData = JSON.parse(saved)
-        // Only restore if the saved scene matches the current session
-        const currentSessionID = window.__sessionID
-        if (sceneData && sceneData.format === 'lixsketch' && sceneData.shapes?.length > 0
-            && (!currentSessionID || !sceneData.sessionID || sceneData.sessionID === currentSessionID)) {
+        if (sceneData && sceneData.format === 'lixsketch' && sceneData.shapes?.length > 0) {
           serializer.load(sceneData)
           console.log(`[AutoSave] Restored ${sceneData.shapes.length} shapes from local save`)
 
           // Restore workspace name if available
-          const meta = localStorage.getItem(LOCAL_SAVE_META_KEY)
+          const meta = localStorage.getItem(getLocalSaveMetaKey())
           if (meta) {
             const { workspaceName } = JSON.parse(meta)
             if (workspaceName) {
@@ -192,8 +199,8 @@ export default function useAutoSave() {
       try {
         const workspaceName = useUIStore.getState().workspaceName || 'Untitled'
         const sceneData = serializer.save(workspaceName)
-        localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(sceneData))
-        localStorage.setItem(LOCAL_SAVE_META_KEY, JSON.stringify({
+        localStorage.setItem(getLocalSaveKey(), JSON.stringify(sceneData))
+        localStorage.setItem(getLocalSaveMetaKey(), JSON.stringify({
           workspaceName,
           savedAt: Date.now(),
           shapeCount: shapes.length,
