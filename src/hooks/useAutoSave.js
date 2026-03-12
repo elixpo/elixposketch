@@ -158,6 +158,7 @@ export default function useAutoSave() {
             permission: 'edit',
             workspaceName,
             createdBy: authState.user?.id || 'anonymous',
+            ownerType: authState.isAuthenticated ? 'user' : 'guest',
           }),
         })
 

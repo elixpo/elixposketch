@@ -16,10 +16,11 @@ const PLANS = [
     glow: 'rgba(74, 144, 217, 0.08)',
     highlight: false,
     features: [
-      'Unlimited local canvases',
+      '1 cloud workspace',
       'All shape & drawing tools',
       'PNG, SVG, PDF export',
       'LixScript diagrams',
+      '5 MB image limit per room',
       '1 shared link at a time',
       'Community support',
     ],
@@ -36,6 +37,7 @@ const PLANS = [
     highlight: true,
     features: [
       'Everything in Free',
+      'Up to 3 cloud workspaces',
       'Unlimited shared links',
       'Real-time collaboration (up to 10)',
       'Cloud auto-save & history',
@@ -55,6 +57,7 @@ const PLANS = [
     highlight: false,
     features: [
       'Everything in Pro',
+      'Unlimited workspaces',
       'Unlimited collaborators',
       'Team workspaces & permissions',
       'Admin dashboard & analytics',
