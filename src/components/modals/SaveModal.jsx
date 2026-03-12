@@ -314,7 +314,7 @@ export default function SaveModal() {
               disabled={saving}
               className="w-full py-2.5 rounded-lg bg-accent-blue hover:bg-accent-blue-hover text-text-primary text-sm cursor-pointer transition-all duration-200 disabled:opacity-50"
             >
-              {saving ? 'Saving to cloud...' : 'Generate Share Link'}
+              {saving ? 'Saving to cloud...' : 'Share Workspace'}
             </button>
           )}
 
@@ -382,7 +382,7 @@ export default function SaveModal() {
             <button
               onClick={handleStartCollab}
               disabled={startingCollab}
-              className="w-full py-2.5 rounded-lg bg-accent-blue/15 hover:bg-accent-blue/25 text-accent-blue text-sm cursor-pointer transition-all duration-200 disabled:opacity-50"
+              className="w-full py-2.5 rounded-lg bg-accent-blue hover:bg-accent-blue-hover text-text-primary text-sm cursor-pointer transition-all duration-200 disabled:opacity-50"
             >
               {startingCollab ? 'Starting room...' : 'Start Live Session'}
             </button>
