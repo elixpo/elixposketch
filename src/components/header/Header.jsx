@@ -127,6 +127,24 @@ function ProfileDropdown() {
   )
 }
 
+function SaveStatusDot() {
+  const saveStatus = useUIStore((s) => s.saveStatus)
+  if (saveStatus === 'idle') return null
+
+  const isCloud = saveStatus === 'cloud'
+  return (
+    <div
+      className="flex items-center gap-1 px-1.5 py-0.5 rounded-md select-none cursor-default"
+      title={isCloud ? 'Synced to cloud' : 'Saved locally'}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${isCloud ? 'bg-green-400' : 'bg-yellow-400'}`} />
+      <span className="text-text-dim text-[10px]">
+        {isCloud ? 'Synced' : 'Local'}
+      </span>
+    </div>
+  )
+}
+
 export default function Header() {
   const workspaceName = useUIStore((s) => s.workspaceName)
   const setWorkspaceName = useUIStore((s) => s.setWorkspaceName)
@@ -178,6 +196,9 @@ export default function Header() {
           className="bg-transparent text-text-secondary text-sm border-none outline-none w-40 px-1.5 py-1 rounded hover:bg-surface-hover/50 focus:bg-surface-hover/50 transition-all duration-200 font-[lixFont]"
           spellCheck={false}
         />
+
+        {/* Save status indicator */}
+        <SaveStatusDot />
       </div>
 
       {/* Right side */}

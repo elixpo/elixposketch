@@ -130,6 +130,11 @@ export default function useAutoSave() {
             }
           }
         }
+          // Mark as locally saved, then sync to cloud
+          useUIStore.getState().setSaveStatus('local')
+          // Trigger cloud sync after restore
+          setTimeout(() => triggerCloudSync(), 3000)
+        }
       } catch (err) {
         console.warn('[AutoSave] Failed to restore:', err)
       }

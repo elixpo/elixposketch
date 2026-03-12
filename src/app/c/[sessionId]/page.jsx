@@ -12,6 +12,7 @@ import AIModal from '@/components/modals/AIModal'
 import CommandPalette from '@/components/modals/CommandPalette'
 import HelpModal from '@/components/modals/HelpModal'
 import ExportImageModal from '@/components/modals/ExportImageModal'
+import CanvasPropertiesModal from '@/components/modals/CanvasPropertiesModal'
 import RectangleSidebar from '@/components/sidebars/RectangleSidebar'
 import CircleSidebar from '@/components/sidebars/CircleSidebar'
 import LineSidebar from '@/components/sidebars/LineSidebar'
@@ -29,7 +30,6 @@ import useAuth from '@/hooks/useAuth'
 import useAutoSave from '@/hooks/useAutoSave'
 import ContextMenu from '@/components/canvas/ContextMenu'
 import FindBar from '@/components/canvas/FindBar'
-import SaveStatusIndicator from '@/components/canvas/SaveStatusIndicator'
 
 export default function CanvasPage() {
   useEffect(() => {
@@ -71,10 +71,9 @@ export default function CanvasPage() {
       <CommandPalette />
       <HelpModal />
       <ExportImageModal />
+      <CanvasPropertiesModal />
       <ContextMenu />
       <FindBar />
-
-      <SaveStatusIndicator />
 
       {/* Quick-save toast */}
       <div
