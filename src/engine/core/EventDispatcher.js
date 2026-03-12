@@ -320,8 +320,31 @@ const handleMainMouseLeave = (e) => {
     }
 };
 
-svg.addEventListener('mousedown', handleMainMouseDown);
-svg.addEventListener('mousemove', handleMainMouseMove);
-svg.addEventListener('mouseup', handleMainMouseUp);
-svg.addEventListener('mouseleave', handleMainMouseLeave);
-export { handleMainMouseDown, handleMainMouseMove, handleMainMouseUp, handleMainMouseLeave };
+let _boundSvg = null;
+
+function initEventDispatcher(svgEl) {
+    if (_boundSvg) cleanupEventDispatcher();
+    const target = svgEl || svg;
+    target.addEventListener('mousedown', handleMainMouseDown);
+    target.addEventListener('mousemove', handleMainMouseMove);
+    target.addEventListener('mouseup', handleMainMouseUp);
+    target.addEventListener('mouseleave', handleMainMouseLeave);
+    _boundSvg = target;
+}
+
+function cleanupEventDispatcher() {
+    if (_boundSvg) {
+        _boundSvg.removeEventListener('mousedown', handleMainMouseDown);
+        _boundSvg.removeEventListener('mousemove', handleMainMouseMove);
+        _boundSvg.removeEventListener('mouseup', handleMainMouseUp);
+        _boundSvg.removeEventListener('mouseleave', handleMainMouseLeave);
+        _boundSvg = null;
+    }
+}
+
+// Auto-init if svg is already available (first load)
+if (typeof svg !== 'undefined' && svg) {
+    initEventDispatcher(svg);
+}
+
+export { handleMainMouseDown, handleMainMouseMove, handleMainMouseUp, handleMainMouseLeave, initEventDispatcher, cleanupEventDispatcher };
