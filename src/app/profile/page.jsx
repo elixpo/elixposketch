@@ -349,7 +349,7 @@ export default function ProfilePage() {
 
                   <UsageBar
                     label="Workspaces"
-                    used={quotaData?.workspaces?.used || workspaces.length}
+                    used={workspaces.length}
                     limit={quotaData?.workspaces?.limit || (isAuthenticated ? 3 : 1)}
                     color="#4A90D9"
                   />
