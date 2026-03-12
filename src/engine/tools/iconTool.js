@@ -386,18 +386,14 @@ const handleMouseDownIcon = async (e) => {
         console.error("Error placing icon:", error);
         isDraggingIcon = false;
         iconToPlace = null;
-        isIconToolActive = false;
     } finally {
         isDraggingIcon = false;
         iconToPlace = null;
-        isIconToolActive = false;
         document.body.style.cursor = 'default';
     }
 
-    // Auto-select placed icon and switch to selection tool
+    // Select the placed icon but stay in icon tool so the sidebar remains open
     if (placedIconShape) {
-        // Switch to select tool via Zustand store bridge
-        if (window.__sketchStoreApi) window.__sketchStoreApi.setActiveTool('select', { afterDraw: true });
         currentShape = placedIconShape;
         currentShape.isSelected = true;
         requestAnimationFrame(() => {
