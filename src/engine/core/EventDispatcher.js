@@ -73,36 +73,57 @@ const handleMainMouseDown = (e) => {
         if (handleMultiSelectionMouseDown(e)) {
             return; // Multi-selection handled the event
         }
-        
+
+        // Remember previous shape to detect deselection
+        const prevShape = currentShape;
+        let handled = false;
+
         // If multi-selection didn't handle it, proceed with shape-specific selection
         if (currentShape?.shapeName === 'rectangle') {
             handleMouseDownRect(e);
+            handled = true;
         } else if (currentShape?.shapeName === 'arrow') {
             handleMouseDownArrow(e);
+            handled = true;
         } else if (currentShape?.shapeName === 'circle') {
             handleMouseDownCircle(e);
+            handled = true;
         } else if (currentShape?.shapeName === 'image') {
             handleMouseDownImage(e);
+            handled = true;
         }
         else if (currentShape?.shapeName === 'line') {
             handleMouseDownLine(e);
+            handled = true;
         }
         else if (currentShape?.shapeName === 'freehandStroke') {
             handleFreehandMouseDown(e);
+            handled = true;
         }
         else if (currentShape?.shapeName === 'text') {
             handleTextMouseDown(e);
+            handled = true;
         }
         else if (currentShape?.shapeName === 'frame') {
             handleMouseDownFrame(e);
+            handled = true;
         }
         else if (currentShape?.shapeName === 'icon') {
             handleMouseDownIcon(e);
+            handled = true;
         }
         else if( currentShape?.shapeName === 'code') {
             handleCodeMouseDown(e);
+            handled = true;
         }
-        else {
+
+        // If the handler deselected (currentShape cleared) but didn't select something new,
+        // fall through to try all handlers so clicking another shape type works
+        if (handled && prevShape && !currentShape) {
+            handled = false;
+        }
+
+        if (!handled) {
             const originalCurrentShape = currentShape;
             handleMouseDownRect(e);
             if (currentShape && currentShape !== originalCurrentShape) return;

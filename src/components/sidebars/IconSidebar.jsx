@@ -183,7 +183,7 @@ export default function IconSidebar() {
             No icons found
           </div>
         ) : (
-          <div className="grid grid-cols-6 gap-0.5">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '2px' }}>
             {icons.map((icon, i) => (
               <IconCell
                 key={icon.filename || i}

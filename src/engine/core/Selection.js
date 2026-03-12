@@ -1599,6 +1599,24 @@ function handleMultiSelectionMouseMove(e) {
         return true;
     }
 
+    // Show move cursor when hovering over any shape in selection mode
+    if (typeof shapes !== 'undefined' && Array.isArray(shapes)) {
+        const overShape = shapes.some(shape => {
+            if (typeof shape.contains === 'function') {
+                return shape.contains(x, y);
+            }
+            return false;
+        });
+        if (overShape && typeof svg !== 'undefined') {
+            svg.style.cursor = 'move';
+            return false;
+        }
+    }
+
+    if (typeof svg !== 'undefined' && svg.style.cursor === 'move') {
+        svg.style.cursor = 'default';
+    }
+
     return false;
 }
 

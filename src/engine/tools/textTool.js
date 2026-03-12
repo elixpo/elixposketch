@@ -207,40 +207,17 @@ function makeTextEditable(textElement, groupElement) {
 
     const svgRect = svg.getBoundingClientRect();
 
-    let groupTransformMatrix = svg.createSVGMatrix();
-    if (groupElement && groupElement.transform && groupElement.transform.baseVal) {
-        const transformList = groupElement.transform.baseVal;
-        if (transformList.numberOfItems > 0) {
-            const consolidatedTransform = transformList.consolidate();
-            if (consolidatedTransform) {
-                groupTransformMatrix = consolidatedTransform.matrix;
-            } else {
-                console.warn("Could not consolidate transform for group:", groupElement);
-                try {
-                    if (transformList.length > 0) {
-                       groupTransformMatrix = transformList.getItem(0).matrix;
-                    }
-                } catch (err) {
-                    console.error("Failed to get any transform matrix.", err);
-                }
-            }
-        } else {
-            console.warn("Group element transform list is empty:", groupElement);
-        }
-    } else {
-         console.warn("Group element, transform, or baseVal is missing or invalid:", groupElement);
-    }
-
+    // Use the group element's own screenCTM which includes group transform + SVG viewBox transform
     const textBBox = textElement.getBBox();
-
     let pt = svg.createSVGPoint();
     pt.x = textBBox.x;
     pt.y = textBBox.y;
 
-    let screenPt = pt.matrixTransform(groupTransformMatrix.multiply(svg.getScreenCTM()));
+    const groupCTM = groupElement.getScreenCTM() || svg.getScreenCTM();
+    let screenPt = pt.matrixTransform(groupCTM);
 
-    input.style.left = `${screenPt.x + svgRect.left}px`;
-    input.style.top = `${screenPt.y + svgRect.top}px`;
+    input.style.left = `${screenPt.x}px`;
+    input.style.top = `${screenPt.y}px`;
 
     const svgZoomFactor = svg.getScreenCTM() ? svg.getScreenCTM().a : 1;
     const screenWidth = textBBox.width * svgZoomFactor;
