@@ -18,7 +18,9 @@ export default function useSessionID() {
     const path = window.location.pathname
     const segments = path.split('/').filter(Boolean)
     const searchParams = new URLSearchParams(window.location.search)
-    const isNewWorkspace = searchParams.get('new') === '1'
+    const isExplicitNew = searchParams.get('new') === '1'
+    const isPathNew = segments[0] === 'c' && segments[1] === 'new'
+    const isNewWorkspace = isExplicitNew || isPathNew
 
     // Expect URL format: /c/<sessionId>
     let sessionID = null
