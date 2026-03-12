@@ -69,19 +69,14 @@ This is an open source project! If you find bugs on the platform, please let us 
 
 <img width="1866" height="877" alt="image" src="https://github.com/user-attachments/assets/a0c53df1-86bb-47f9-a062-1b8dee0999f6" />
 
-```bash
-# Clone and run locally
-git clone https://github.com/elixpo/lixsketch.git
-cd lixsketch
-npm install
-npm run dev
-```
 
 ## Star History
 
 <div align="center">
 
-[![Star History Chart](https://api.star-history.com/svg?repos=elixpo/lixsketch&type=Date&theme=dark)](https://star-history.com/#elixpo/lixsketch&Date)
+## Star History
+
+[![Star History Chart](https://api.star-history.com/image?repos=elixpo/lixsketch&type=date&legend=top-left)](https://www.star-history.com/?repos=elixpo%2Flixsketch&type=date&legend=top-left)
 
 </div>
 
@@ -91,12 +86,6 @@ npm run dev
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,20,24&height=120&section=footer&fontSize=0" width="100%" />
 
-<sub>
-
-**[Elixpo](https://elixpo.com)** &nbsp;&middot;&nbsp; Building tools for developers, in public.
-
-[Website](https://sketch.elixpo.com) &nbsp;&middot;&nbsp; [Docs](https://sketch.elixpo.com/docs) &nbsp;&middot;&nbsp; [Issues](https://github.com/elixpo/lixsketch/issues)
-
-</sub>
+### Made with ❤️ by [Elixpo](https://elixpo.com) | [GitHub](https://github.com/elixpo/lixsketch)
 
 </div>
