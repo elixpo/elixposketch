@@ -17,6 +17,10 @@
  * Returns the key as a base64url string for embedding in URLs.
  */
 export async function generateKey() {
+  if (typeof crypto === 'undefined' || !crypto.subtle) {
+    console.warn("Web Crypto API not available. Using fallback key for local dev.");
+    return btoa('fallback-key-for-local-development').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  }
   const key = await crypto.subtle.generateKey(
     { name: 'AES-GCM', length: 256 },
     true,
@@ -31,6 +35,16 @@ export async function generateKey() {
  * Returns base64url-encoded ciphertext (iv + encrypted data).
  */
 export async function encrypt(plaintext, keyBase64url) {
+  if (typeof crypto === 'undefined' || !crypto.subtle) {
+    console.warn("Web Crypto API not available in unsecure context. Skipping encryption for local dev.");
+    const encoded = new TextEncoder().encode(plaintext);
+    const iv = new Uint8Array(12);
+    const combined = new Uint8Array(iv.length + encoded.length);
+    combined.set(iv);
+    combined.set(encoded, iv.length);
+    return bufToBase64url(combined);
+  }
+
   const keyBuf = base64urlToBuf(keyBase64url)
   const key = await crypto.subtle.importKey(
     'raw', keyBuf,
@@ -60,6 +74,12 @@ export async function encrypt(plaintext, keyBase64url) {
  * Returns the original plaintext string.
  */
 export async function decrypt(ciphertextBase64url, keyBase64url) {
+  if (typeof crypto === 'undefined' || !crypto.subtle) {
+    const combined = base64urlToBuf(ciphertextBase64url)
+    const ciphertext = combined.slice(12)
+    return new TextDecoder().decode(ciphertext)
+  }
+
   const keyBuf = base64urlToBuf(keyBase64url)
   const key = await crypto.subtle.importKey(
     'raw', keyBuf,
