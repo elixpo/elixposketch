@@ -35,6 +35,8 @@ export async function GET(request) {
          WHERE sp.token = ?`
       ).bind(token).first()
     } else if (sessionId) {
+      // Intentional bypass: querying by sessionId directly allows owners/initial creators
+      // to load the scene from their local storage or URL without needing a share token.
       perm = await DB.prepare(
         `SELECT permission, encrypted_data, workspace_name, session_id
          FROM scenes

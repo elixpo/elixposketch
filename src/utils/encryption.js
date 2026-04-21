@@ -12,13 +12,19 @@
  * only people with the link (which includes the key) can read it.
  */
 
+const isLocalhost = () => typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
 /**
  * Generate a new AES-GCM 256-bit encryption key.
  * Returns the key as a base64url string for embedding in URLs.
  */
 export async function generateKey() {
   if (typeof crypto === 'undefined' || !crypto.subtle) {
-    console.warn("Web Crypto API not available. Using fallback key for local dev.");
+    if (!isLocalhost()) {
+      console.error("SECURITY WARNING: Web Crypto API not available in this context. Encryption is bypassed. This should only happen in local dev!");
+    } else {
+      console.warn("Web Crypto API not available. Using fallback key for local dev.");
+    }
     return btoa('fallback-key-for-local-development').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
   }
   const key = await crypto.subtle.generateKey(
@@ -36,7 +42,11 @@ export async function generateKey() {
  */
 export async function encrypt(plaintext, keyBase64url) {
   if (typeof crypto === 'undefined' || !crypto.subtle) {
-    console.warn("Web Crypto API not available in unsecure context. Skipping encryption for local dev.");
+    if (!isLocalhost()) {
+      console.error("SECURITY WARNING: Web Crypto API not available in this context. Encryption is bypassed. This should only happen in local dev!");
+    } else {
+      console.warn("Web Crypto API not available in unsecure context. Skipping encryption for local dev.");
+    }
     const encoded = new TextEncoder().encode(plaintext);
     const iv = new Uint8Array(12);
     const combined = new Uint8Array(iv.length + encoded.length);

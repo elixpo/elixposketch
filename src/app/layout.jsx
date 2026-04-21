@@ -1,5 +1,4 @@
 import './globals.css'
-import 'boxicons/css/boxicons.min.css'
 import 'highlight.js/styles/github-dark-dimmed.css'
 import InitHljs from '@/components/InitHljs'
 const SITE_URL = 'https://sketch.elixpo.com'
@@ -137,6 +136,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark">
       <head>
+        <link rel="stylesheet" href="/boxicons/css/boxicons.min.css" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

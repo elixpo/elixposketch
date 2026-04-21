@@ -425,7 +425,7 @@ export default function LandingPage() {
           >
             <Link
               href={newSessionId ? `/c/${newSessionId}` : '#'}
-              className="px-8 py-3.5 bg-accent-blue hover:bg-accent-blue-hover text-white rounded-xl text-base transition-all duration-200 hover:shadow-xl hover:shadow-accent-blue/25 flex items-center gap-2"
+              className={`px-8 py-3.5 bg-accent-blue hover:bg-accent-blue-hover text-white rounded-xl text-base transition-all duration-200 hover:shadow-xl hover:shadow-accent-blue/25 flex items-center gap-2 ${!newSessionId ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <i className="bx bx-palette text-xl" />
               Start Drawing
@@ -716,7 +716,7 @@ export default function LandingPage() {
           </p>
           <Link
             href={newSessionId ? `/c/${newSessionId}` : '#'}
-            className="inline-flex items-center gap-2 px-10 py-4 bg-accent-blue hover:bg-accent-blue-hover text-white rounded-xl text-lg transition-all duration-200 hover:shadow-xl hover:shadow-accent-blue/25"
+            className={`inline-flex items-center gap-2 px-10 py-4 bg-accent-blue hover:bg-accent-blue-hover text-white rounded-xl text-lg transition-all duration-200 hover:shadow-xl hover:shadow-accent-blue/25 ${!newSessionId ? 'opacity-50 pointer-events-none' : ''}`}
           >
             <i className="bx bx-palette text-2xl" />
             Launch Canvas
