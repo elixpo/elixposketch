@@ -2,19 +2,10 @@
 
 import useSketchStore from '@/store/useSketchStore'
 import useDocAutoSave, { triggerDocSync } from '@/hooks/useDocAutoSave'
-
-// BlockNote ships its base styles separately; the lixeditor stylesheet
-// only contains overrides on top of these.
 import '@blocknote/core/fonts/inter.css'
 import '@blocknote/mantine/style.css'
 import '@elixpo/lixeditor/styles'
 import './docs-theme.css'
-
-// Static imports work here because this whole component is loaded via
-// `next/dynamic({ ssr: false })` from page.jsx. Wrapping LixEditor /
-// LixThemeProvider in additional `dynamic()` calls created separate
-// boundaries that broke React context propagation, leaving the editor
-// stuck in light mode.
 import { LixEditor, LixThemeProvider } from '@elixpo/lixeditor'
 
 function DocsLoading() {

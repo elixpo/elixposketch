@@ -17,14 +17,35 @@ export default function SVGCanvas() {
   const [viewBox, setViewBox] = useState('0 0 1920 1080')
 
   useEffect(() => {
-    setViewBox(`0 0 ${window.innerWidth} ${window.innerHeight}`)
+    // Match viewBox to the SVG element's actual rendered size, not the
+    // viewport. In split mode the SVG is narrower than window.innerWidth,
+    // so using innerWidth would scale coordinates and offset the pointer.
+    const updateViewBox = () => {
+      const el = svgRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const w = Math.max(1, Math.round(rect.width))
+      const h = Math.max(1, Math.round(rect.height))
+      setViewBox(`0 0 ${w} ${h}`)
+    }
+
+    updateViewBox()
     setSvgReady(true)
 
-    const onResize = () => {
-      setViewBox(`0 0 ${window.innerWidth} ${window.innerHeight}`)
+    window.addEventListener('resize', updateViewBox)
+
+    // Also re-measure when the SVG itself resizes (split-pane drag, layout
+    // mode flip) — these don't always emit a window resize.
+    let ro
+    if (typeof ResizeObserver !== 'undefined' && svgRef.current) {
+      ro = new ResizeObserver(updateViewBox)
+      ro.observe(svgRef.current)
     }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+
+    return () => {
+      window.removeEventListener('resize', updateViewBox)
+      if (ro) ro.disconnect()
+    }
   }, [])
 
   // Close icon sidebar when clicking on canvas without an icon ready to place

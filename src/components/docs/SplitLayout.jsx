@@ -42,7 +42,6 @@ export default function SplitLayout({ canvas, docs }) {
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
       try { localStorage.setItem(STORAGE_KEY, String(ratio)) } catch {}
-      // Force a resize so the SVG canvas re-measures.
       window.dispatchEvent(new Event('resize'))
     }
     window.addEventListener('mousemove', onMove)
