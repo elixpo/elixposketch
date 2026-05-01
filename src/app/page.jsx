@@ -526,14 +526,14 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <h3 className="text-text-primary text-lg font-medium group-hover:text-accent-blue transition-colors">NPM Package</h3>
-                    <p className="text-text-dim text-xs">@elixpo/sketch.elixpo</p>
+                    <p className="text-text-dim text-xs">@elixpo/lixsketch</p>
                   </div>
                 </div>
                 <p className="text-text-muted text-sm leading-relaxed mb-5">
                   Mount a full infinite canvas on any SVG element. Works with React, Vue, Svelte, or plain HTML.
                 </p>
                 <div className="bg-[#0d0d14] rounded-lg border border-white/[0.06] px-4 py-3">
-                  <code className="text-green-400 text-sm font-[lixCode]">npm install @elixpo/sketch.elixpo</code>
+                  <code className="text-green-400 text-sm font-[lixCode]">npm install @elixpo/lixsketch</code>
                 </div>
               </Link>
             </motion.div>

@@ -19,7 +19,7 @@ An open-source freemium platform for collaborative canvas — technical presenta
 
 [![Website](https://img.shields.io/badge/Website-sketch.elixpo.com-5B57D1?style=flat-square&logo=googlechrome&logoColor=white)](https://sketch.elixpo.com)
 [![Docs](https://img.shields.io/badge/Docs-LixScript-8B88E8?style=flat-square&logo=bookstack&logoColor=white)](https://sketch.elixpo.com/docs)
-[![npm](https://img.shields.io/npm/v/@elixpo/sketch.elixpo?style=flat-square&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/@elixpo/sketch.elixpo)
+[![npm](https://img.shields.io/npm/v/@elixpo/lixsketch?style=flat-square&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/@elixpo/lixsketch)
 [![VS Code](https://img.shields.io/badge/VS%20Code-Extension-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=elixpo.lixsketch)
 
 </div>
@@ -57,7 +57,7 @@ LixSketch offers technical / professional proficiency in quick canvases used for
 |---|---|---|
 | 🌐 | **[Web App](https://sketch.elixpo.com)** | Full collaborative canvas in the browser |
 | 🖥️ | **[VS Code Extension](https://marketplace.visualstudio.com/items?itemName=elixpo.lixsketch)** | Draw diagrams right inside your editor — open any `.lixsketch` file |
-| 📦 | **[NPM Package](https://www.npmjs.com/package/@elixpo/sketch.elixpo)** | Embed the engine in your own app with `npm install @elixpo/sketch.elixpo` |
+| 📦 | **[NPM Package](https://www.npmjs.com/package/@elixpo/lixsketch)** | Embed the engine in your own app with `npm install @elixpo/lixsketch` |
 
 </div>
 
@@ -76,11 +76,11 @@ ext install elixpo.lixsketch
 Build your own whiteboard, diagramming tool, or collaborative canvas with a few lines of code.
 
 ```bash
-npm install @elixpo/sketch.elixpo
+npm install @elixpo/lixsketch
 ```
 
 ```javascript
-import { createSketchEngine, TOOLS } from '@elixpo/sketch.elixpo';
+import { createSketchEngine, TOOLS } from '@elixpo/lixsketch';
 
 const engine = createSketchEngine(svgElement);
 await engine.init();

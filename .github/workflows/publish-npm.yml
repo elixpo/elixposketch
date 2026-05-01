@@ -1,4 +1,4 @@
-name: Publish @elixpo/sketch.elixpo to NPM
+name: Publish @elixpo/lixsketch to NPM
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
         working-directory: packages/sketch.elixpo
         run: |
           LOCAL=$(node -p "require('./package.json').version")
-          REMOTE=$(npm view @elixpo/sketch.elixpo version 2>/dev/null || echo "0.0.0")
+          REMOTE=$(npm view @elixpo/lixsketch version 2>/dev/null || echo "0.0.0")
           echo "Local version: $LOCAL"
           echo "Published version: $REMOTE"
           if [ "$LOCAL" = "$REMOTE" ]; then

@@ -4,7 +4,7 @@
 
 ### Other
 - Rebrand: Rename all occurrences of `elixpo/lixsketch` to `elixpo/sketch.elixpo`
-- Rebrand: Rename `@elixpo/lixsketch` package to `@elixpo/sketch.elixpo`
+- Rebrand: Rename `@elixpo/lixsketch` package to `@elixpo/lixsketch`
 - Rebrand: Rename `packages/lixsketch/` directory to `packages/sketch.elixpo/`
 - Update all documentation, GitHub URLs, and internal imports to match the new name
 

@@ -1,17 +1,17 @@
-# @elixpo/sketch.elixpo — NPM Package
+# @elixpo/lixsketch — NPM Package
 
 The LixSketch engine is available as a standalone npm package. Mount an infinite, hand-drawn canvas on any SVG element in your app — React, Vue, Svelte, or plain HTML.
 
 ## Install
 
 ```bash
-npm install @elixpo/sketch.elixpo
+npm install @elixpo/lixsketch
 ```
 
 ## Quick Start
 
 ```js
-import { LixSketch } from '@elixpo/sketch.elixpo'
+import { LixSketch } from '@elixpo/lixsketch'
 
 const svg = document.querySelector('#my-svg')
 const sketch = new LixSketch(svg)
@@ -35,7 +35,7 @@ That's it. You get a fully interactive canvas with all drawing tools, zoom, pan,
 
 ```jsx
 import { useEffect, useRef } from 'react'
-import { LixSketch } from '@elixpo/sketch.elixpo'
+import { LixSketch } from '@elixpo/lixsketch'
 
 export default function Whiteboard() {
   const svgRef = useRef(null)
@@ -54,7 +54,7 @@ export default function Whiteboard() {
 ```html
 <svg id="canvas" style="width:100%;height:100vh;"></svg>
 <script type="module">
-  import { LixSketch } from '@elixpo/sketch.elixpo'
+  import { LixSketch } from '@elixpo/lixsketch'
   new LixSketch(document.getElementById('canvas'))
 </script>
 ```
@@ -81,6 +81,6 @@ export default function Whiteboard() {
 
 ## Links
 
-- [NPM Registry](https://www.npmjs.com/package/@elixpo/sketch.elixpo)
+- [NPM Registry](https://www.npmjs.com/package/@elixpo/lixsketch)
 - [GitHub](https://github.com/elixpo/sketch.elixpo)
 - [LixScript Docs](/docs)
