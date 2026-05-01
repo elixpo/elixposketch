@@ -66,12 +66,6 @@ export default function PricingPage() {
           >
             Start sketching
           </Link>
-          <a
-            href="mailto:hello@elixpo.com?subject=Notify%20me%20about%20LixSketch%20pricing"
-            className="px-5 py-2 bg-surface hover:bg-surface-hover border border-border-light rounded-lg text-sm transition-all duration-200"
-          >
-            Notify me on launch
-          </a>
         </div>
 
         <p className="text-text-dim text-[11px] mt-2">
