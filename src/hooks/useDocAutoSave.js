@@ -3,152 +3,193 @@
 import { useEffect, useRef, useState } from 'react'
 import useUIStore from '@/store/useUIStore'
 import useSketchStore from '@/store/useSketchStore'
-import { WORKER_URL } from '@/store/useAuthStore'
+import useAuthStore, { WORKER_URL } from '@/store/useAuthStore'
 import { getSessionID } from '@/hooks/useSessionID'
 import { encrypt, decrypt, generateKey } from '@/utils/encryption'
+import { useProfileStore } from '@/hooks/useGuestProfile'
 
 const LOCAL_KEY_PREFIX = 'lixsketch-doc-autosave'
-const DEBOUNCE_MS = 800
-const CLOUD_INTERVAL = 30_000 // 30s — docs typically save more often than scenes
+const LOCAL_META_PREFIX = 'lixsketch-doc-autosave-meta'
 
-const localKey = () => {
+const KEYSTROKE_DEBOUNCE_MS = 250          // localStorage write debounce
+const CLOUD_INTERVAL_MS = 30_000           // periodic cloud sync
+const CLOUD_DEBOUNCE_MS = 1_500            // cloud sync after typing pause
+const RATE_LIMIT_WINDOW = 60_000
+const RATE_LIMIT_MAX = 4
+const MAX_DOC_BYTES = 5_000_000
+
+function localKey() {
   const sid = typeof window !== 'undefined' ? window.__sessionID : null
   return sid ? `${LOCAL_KEY_PREFIX}-${sid}` : LOCAL_KEY_PREFIX
 }
+function metaKey() {
+  const sid = typeof window !== 'undefined' ? window.__sessionID : null
+  return sid ? `${LOCAL_META_PREFIX}-${sid}` : LOCAL_META_PREFIX
+}
 
-let pendingBlocks = null
-let dirty = false
+// Stable per-tab client identity for optimistic-concurrency conflict detection.
+function getClientId() {
+  if (typeof window === 'undefined') return null
+  if (!window.__lixDocClientId) {
+    window.__lixDocClientId = `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
+  }
+  return window.__lixDocClientId
+}
 
-export function triggerDocSync(blocks) {
-  pendingBlocks = blocks
-  dirty = true
+// ── Module-level state (per tab) ────────────────────────────────
+let _pendingBlocks = null
+let _dirty = false
+let _lastSeenUpdatedAt = null              // server timestamp of last successful sync
+let _localWriteTimer = null
+let _cloudDebounceTimer = null
+const _dbSaveTimestamps = []
+
+function isRateLimited() {
+  const now = Date.now()
+  while (_dbSaveTimestamps.length && now - _dbSaveTimestamps[0] > RATE_LIMIT_WINDOW) {
+    _dbSaveTimestamps.shift()
+  }
+  return _dbSaveTimestamps.length >= RATE_LIMIT_MAX
+}
+function recordDbSave() {
+  _dbSaveTimestamps.push(Date.now())
+}
+
+function callerIdFromState() {
+  const auth = useAuthStore.getState()
+  if (auth.isAuthenticated) return auth.user?.id || 'anonymous'
+  return useProfileStore.getState().profile?.id ||
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('lixsketch-guest-session') : null) ||
+    'anonymous'
+}
+
+function writeLocalNow() {
+  if (!_pendingBlocks || typeof window === 'undefined') return
   try {
-    localStorage.setItem(localKey(), JSON.stringify({ blocks, savedAt: Date.now() }))
+    localStorage.setItem(localKey(), JSON.stringify({
+      blocks: _pendingBlocks,
+      savedAt: Date.now(),
+    }))
+    localStorage.setItem(metaKey(), JSON.stringify({
+      lastSeenUpdatedAt: _lastSeenUpdatedAt,
+      clientId: getClientId(),
+    }))
   } catch {}
 }
 
+/**
+ * Called from the editor's onChange. Stores blocks in module state and
+ * schedules a debounced localStorage write + a debounced cloud sync.
+ * Pure synchronous work — does not stringify on the hot path.
+ */
+export function triggerDocSync(blocks) {
+  _pendingBlocks = blocks
+  _dirty = true
+
+  // Debounce localStorage write so we don't serialize a giant doc
+  // every keystroke.
+  clearTimeout(_localWriteTimer)
+  _localWriteTimer = setTimeout(writeLocalNow, KEYSTROKE_DEBOUNCE_MS)
+
+  // Schedule a cloud sync after a longer pause; the periodic interval
+  // is still the primary persistence mechanism.
+  clearTimeout(_cloudDebounceTimer)
+  _cloudDebounceTimer = setTimeout(() => { syncToCloud().catch(() => {}) }, CLOUD_DEBOUNCE_MS)
+}
+
+/**
+ * Pushes the buffered doc to D1. Reuses the scene's per-session
+ * encryption key — bails if it isn't available yet (scene autosave will
+ * lay it down first; this hook waits via `keyReady` in the React layer).
+ */
 async function syncToCloud() {
-  if (!WORKER_URL || !dirty || !pendingBlocks) return
+  if (!WORKER_URL || !_dirty || !_pendingBlocks) return false
+  if (isRateLimited()) {
+    console.log('[DocAutoSave] rate limited, skipping')
+    return false
+  }
+
+  const sessionId = getSessionID()
+  if (!sessionId) return false
+
+  // CRITICAL: never mint a fresh key here. If scene hasn't published its
+  // key, defer — minting a different one would silently encrypt the doc
+  // with a key that diverges from the scene's, making it unrecoverable.
+  const encKey = useUIStore.getState().loadEncryptionKeyForSession?.(sessionId)
+  if (!encKey) {
+    console.log('[DocAutoSave] scene key not ready yet — deferring cloud sync')
+    return false
+  }
+
+  // Snapshot current pending content so the sync isn't fighting in-flight
+  // edits.
+  const blocksAtSyncStart = _pendingBlocks
+  const json = JSON.stringify(blocksAtSyncStart)
+  if (new Blob([json]).size > MAX_DOC_BYTES) {
+    console.warn('[DocAutoSave] doc exceeds size limit; refusing to upload')
+    return false
+  }
+
   try {
-    const sessionId = getSessionID()
-    if (!sessionId) return
-
-    let encKey = useUIStore.getState().loadEncryptionKeyForSession?.(sessionId)
-    if (!encKey) {
-      // Fall back to generating a fresh per-session key for the doc.
-      encKey = await generateKey()
-      useUIStore.getState().setSessionEncryptionKey?.(encKey, sessionId)
-    }
-
-    const encryptedData = await encrypt(JSON.stringify(pendingBlocks), encKey)
+    const encryptedData = await encrypt(json, encKey)
     const res = await fetch(`${WORKER_URL}/api/canvas-docs/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, encryptedData }),
+      body: JSON.stringify({
+        sessionId,
+        encryptedData,
+        createdBy: callerIdFromState(),
+        clientId: getClientId(),
+        lastSeenUpdatedAt: _lastSeenUpdatedAt,
+      }),
     })
-    if (res.ok) dirty = false
+
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}))
+      if (data.updatedAt) _lastSeenUpdatedAt = data.updatedAt
+      // Only clear dirty flag if no further edits arrived during the request.
+      if (_pendingBlocks === blocksAtSyncStart) _dirty = false
+      recordDbSave()
+      return true
+    }
+
+    if (res.status === 409) {
+      const data = await res.json().catch(() => ({}))
+      console.warn('[DocAutoSave] conflict — another client wrote a newer version', data)
+      _lastSeenUpdatedAt = data.serverUpdatedAt || _lastSeenUpdatedAt
+      // Don't clear dirty — operator decides whether to overwrite.
+      return false
+    }
+
+    if (res.status === 413) {
+      console.warn('[DocAutoSave] doc too large')
+      return false
+    }
+
+    console.warn('[DocAutoSave] cloud save failed:', res.status)
+    return false
   } catch (err) {
-    console.warn('[DocAutoSave] cloud sync failed:', err)
+    console.warn('[DocAutoSave] cloud sync error:', err)
+    return false
   }
 }
 
 /**
- * Hydrates the doc panel: tries cloud → localStorage → empty.
- * Sets up debounced saves to cloud + localStorage.
- *
- * Returns { initialContent, ready }. The editor is mounted only when ready.
+ * Force a cloud flush. Called from Ctrl+S and from the unified
+ * triggerCloudSync in useAutoSave so scene + doc save together.
  */
-export default function useDocAutoSave(active) {
-  const setLayoutMode = useSketchStore((s) => s.setLayoutMode)
-  const [initialContent, setInitialContent] = useState(undefined)
-  const [ready, setReady] = useState(false)
-  const debounceTimer = useRef(null)
-  const cloudTimer = useRef(null)
-
-  // Hydrate on first activation.
-  useEffect(() => {
-    if (!active || ready) return
-    let cancelled = false
-
-    const hydrate = async () => {
-      const sessionId = getSessionID()
-
-      // Local first (instant).
-      try {
-        const raw = localStorage.getItem(localKey())
-        if (raw) {
-          const parsed = JSON.parse(raw)
-          if (parsed?.blocks) {
-            if (!cancelled) setInitialContent(parsed.blocks)
-          }
-        }
-      } catch {}
-
-      // Cloud (authoritative).
-      if (WORKER_URL && sessionId) {
-        try {
-          const res = await fetch(`${WORKER_URL}/api/canvas-docs/load?sessionId=${sessionId}`)
-          if (res.ok) {
-            const data = await res.json()
-            if (data.layoutMode) {
-              // Restore the user's preferred layout (only on first hydration).
-              const current = useSketchStore.getState().layoutMode
-              if (current === 'canvas' && data.layoutMode !== 'canvas') {
-                setLayoutMode(data.layoutMode)
-              }
-            }
-            if (data.encryptedData) {
-              const encKey = useUIStore.getState().loadEncryptionKeyForSession?.(sessionId)
-              if (encKey) {
-                try {
-                  const decrypted = await decrypt(data.encryptedData, encKey)
-                  const blocks = JSON.parse(decrypted)
-                  if (!cancelled) setInitialContent(blocks)
-                } catch (err) {
-                  console.warn('[DocAutoSave] decrypt failed:', err)
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.warn('[DocAutoSave] cloud fetch failed:', err)
-        }
-      }
-
-      if (!cancelled) setReady(true)
-    }
-
-    hydrate()
-    return () => { cancelled = true }
-  }, [active, ready, setLayoutMode])
-
-  // Debounced cloud sync loop.
-  useEffect(() => {
-    if (!active) return
-    cloudTimer.current = setInterval(syncToCloud, CLOUD_INTERVAL)
-    const onUnload = () => syncToCloud()
-    window.addEventListener('beforeunload', onUnload)
-    return () => {
-      clearInterval(cloudTimer.current)
-      window.removeEventListener('beforeunload', onUnload)
-      syncToCloud()
-    }
-  }, [active])
-
-  // Schedule a debounced sync whenever the user types — `triggerDocSync` is
-  // called from the editor's onChange; we just piggyback a debounce here.
-  useEffect(() => {
-    if (!active) return
-    const i = setInterval(() => {
-      if (dirty) {
-        clearTimeout(debounceTimer.current)
-        debounceTimer.current = setTimeout(syncToCloud, DEBOUNCE_MS)
-      }
-    }, 500)
-    return () => clearInterval(i)
-  }, [active])
-
-  return { initialContent, ready }
+export async function triggerDocCloudSync() {
+  // Flush any pending localStorage debounce first.
+  if (_localWriteTimer) {
+    clearTimeout(_localWriteTimer)
+    _localWriteTimer = null
+    writeLocalNow()
+  }
+  if (_cloudDebounceTimer) {
+    clearTimeout(_cloudDebounceTimer)
+    _cloudDebounceTimer = null
+  }
+  return syncToCloud()
 }
 
 export async function persistLayoutMode(layoutMode) {
@@ -159,7 +200,114 @@ export async function persistLayoutMode(layoutMode) {
     await fetch(`${WORKER_URL}/api/canvas-docs/layout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, layoutMode }),
+      body: JSON.stringify({ sessionId, layoutMode, createdBy: callerIdFromState() }),
     })
   } catch {}
+}
+
+/**
+ * Hydrates the editor: cloud → localStorage → empty.
+ * Holds the editor mount until hydrated so we never submit a default
+ * empty doc to a session that already has saved content.
+ */
+export default function useDocAutoSave(active) {
+  const setLayoutMode = useSketchStore((s) => s.setLayoutMode)
+  const [initialContent, setInitialContent] = useState(undefined)
+  const [ready, setReady] = useState(false)
+
+  // Hydrate once on first activation.
+  useEffect(() => {
+    if (!active || ready) return
+    let cancelled = false
+
+    const hydrate = async () => {
+      const sessionId = getSessionID()
+
+      // 1. Local first (instant if present).
+      try {
+        const raw = localStorage.getItem(localKey())
+        const meta = localStorage.getItem(metaKey())
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          if (parsed?.blocks && !cancelled) setInitialContent(parsed.blocks)
+        }
+        if (meta) {
+          const m = JSON.parse(meta)
+          if (m?.lastSeenUpdatedAt) _lastSeenUpdatedAt = m.lastSeenUpdatedAt
+        }
+      } catch {}
+
+      // 2. Cloud (authoritative). Pass callerId so the worker can auth.
+      if (WORKER_URL && sessionId) {
+        try {
+          const url = `${WORKER_URL}/api/canvas-docs/load?sessionId=${sessionId}&callerId=${encodeURIComponent(callerIdFromState())}`
+          const res = await fetch(url)
+          if (res.ok) {
+            const data = await res.json()
+            if (data.layoutMode) {
+              const current = useSketchStore.getState().layoutMode
+              if (current === 'canvas' && data.layoutMode !== 'canvas') {
+                setLayoutMode(data.layoutMode)
+              }
+            }
+            if (data.updatedAt) _lastSeenUpdatedAt = data.updatedAt
+            if (data.encryptedData) {
+              const encKey = useUIStore.getState().loadEncryptionKeyForSession?.(sessionId)
+              if (encKey) {
+                try {
+                  const decrypted = await decrypt(data.encryptedData, encKey)
+                  const blocks = JSON.parse(decrypted)
+                  if (!cancelled) setInitialContent(blocks)
+                } catch (err) {
+                  console.warn('[DocAutoSave] decrypt failed:', err)
+                }
+              } else {
+                console.log('[DocAutoSave] cloud doc exists but scene key not yet loaded — keeping local copy')
+              }
+            }
+          } else if (res.status !== 404) {
+            console.warn('[DocAutoSave] cloud load failed:', res.status)
+          }
+        } catch (err) {
+          console.warn('[DocAutoSave] cloud fetch error:', err)
+        }
+      }
+
+      if (!cancelled) setReady(true)
+    }
+
+    hydrate()
+    return () => { cancelled = true }
+  }, [active, ready, setLayoutMode])
+
+  // Periodic cloud sync.
+  useEffect(() => {
+    if (!active) return
+    const id = setInterval(() => { syncToCloud().catch(() => {}) }, CLOUD_INTERVAL_MS)
+    return () => clearInterval(id)
+  }, [active])
+
+  // Flush on tab unload / visibility hide.
+  useEffect(() => {
+    if (!active) return
+    const onUnload = () => {
+      if (_localWriteTimer) { clearTimeout(_localWriteTimer); writeLocalNow() }
+    }
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        if (_localWriteTimer) { clearTimeout(_localWriteTimer); writeLocalNow() }
+        syncToCloud().catch(() => {})
+      }
+    }
+    window.addEventListener('beforeunload', onUnload)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.removeEventListener('beforeunload', onUnload)
+      document.removeEventListener('visibilitychange', onVisibility)
+      // Final flush.
+      if (_localWriteTimer) { clearTimeout(_localWriteTimer); writeLocalNow() }
+    }
+  }, [active])
+
+  return { initialContent, ready }
 }
