@@ -143,7 +143,7 @@ We welcome PRs across the surface area:
 
 - Anything touching auth, sessions, encryption keys, or worker endpoints must be reviewed by a maintainer.
 - Don't commit secrets, tokens, or production database dumps. The committed `wrangler.toml` only contains public binding ids — secrets are set via `wrangler secret put`.
-- Found a vulnerability? Don't open a public issue. Email a maintainer or report it privately.
+- Found a vulnerability? Don't open a public issue. See [SECURITY.md](SECURITY.md) — short version: email **security@elixpo.com** or use GitHub's [private vulnerability reporting](https://github.com/elixpo/lixsketch/security/advisories/new).
 
 ### Database changes
 
