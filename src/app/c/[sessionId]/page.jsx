@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import Script from 'next/script'
 import Header from '@/components/header/Header'
 import Toolbar from '@/components/toolbar/Toolbar'
 import Footer from '@/components/footer/Footer'
@@ -34,6 +33,9 @@ import useAutoSave from '@/hooks/useAutoSave'
 import CanvasLoadingOverlay from '@/components/canvas/CanvasLoadingOverlay'
 import ContextMenu from '@/components/canvas/ContextMenu'
 import FindBar from '@/components/canvas/FindBar'
+import SplitLayout from '@/components/docs/SplitLayout'
+import DocsPanel from '@/components/docs/DocsPanel'
+import useSketchStore from '@/store/useSketchStore'
 
 export default function CanvasPage() {
   useEffect(() => {
@@ -47,24 +49,35 @@ export default function CanvasPage() {
   useGuestProfile()
   useAutoSave()
 
+  const layoutMode = useSketchStore((s) => s.layoutMode)
+  const canvasVisible = layoutMode !== 'docs'
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-black">
       <Header />
-      <Toolbar />
 
-      <RectangleSidebar />
-      <CircleSidebar />
-      <LineSidebar />
-      <ArrowSidebar />
-      <PaintbrushSidebar />
-      <TextSidebar />
-      <FrameSidebar />
-      <IconSidebar />
-      <ImageSidebar />
+      {/* Toolbar + sidebars only matter when the canvas is on screen */}
+      {canvasVisible && (
+        <>
+          <Toolbar />
+          <RectangleSidebar />
+          <CircleSidebar />
+          <LineSidebar />
+          <ArrowSidebar />
+          <PaintbrushSidebar />
+          <TextSidebar />
+          <FrameSidebar />
+          <IconSidebar />
+          <ImageSidebar />
+        </>
+      )}
 
-      <SVGCanvas />
+      <SplitLayout
+        canvas={<SVGCanvas />}
+        docs={<DocsPanel />}
+      />
 
-      <MultiSelectActions />
+      {canvasVisible && <MultiSelectActions />}
       <Footer />
       <AppMenu />
       <ShortcutsModal />
@@ -80,7 +93,6 @@ export default function CanvasPage() {
       <FindBar />
       <CanvasLoadingOverlay />
 
-      {/* Quick-save toast — shown only on explicit Ctrl+S save */}
       <div
         id="save-toast"
         className="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-9999 px-4 py-2 rounded-xl bg-surface/80 backdrop-blur-md border border-border-light text-text-secondary text-xs font-[lixFont] pointer-events-none animate-fade-in"
