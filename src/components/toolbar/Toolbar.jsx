@@ -23,7 +23,9 @@ const TOOL_ITEMS = [
   { tool: TOOLS.FRAME, icon: 'bx-crop', title: 'Frame (F)', key: 'F' },
   { tool: TOOLS.LASER, icon: 'bxs-magic-wand', title: 'Laser (K)', key: 'K' },
   { tool: TOOLS.ERASER, icon: 'bxs-eraser', title: 'Eraser (E)', key: 'E' },
-  { tool: 'ai', icon: null, title: 'AI', isAI: true },
+  // AI tool entry removed while the assistant is coming-soon.
+  // Restore `{ tool: 'ai', icon: null, title: 'AI', isAI: true }` here
+  // when the modal becomes a real feature again.
 ]
 
 export default function Toolbar() {
