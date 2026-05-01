@@ -44,10 +44,8 @@
     "worker:dev": "wrangler dev",
     "worker:deploy": "wrangler deploy",
     "db:create": "wrangler d1 create lixsketch",
-    "db:migrate": "wrangler d1 migrations apply lixsketch --remote",
-    "db:migrate:local": "wrangler d1 migrations apply lixsketch --local",
-    "db:migrate:file": "wrangler d1 execute lixsketch --remote --file=",
-    "db:migrate:file:local": "wrangler d1 execute lixsketch --local --file=",
+    "db:migrate": "node scripts/db-migrate.mjs --remote",
+    "db:migrate:local": "node scripts/db-migrate.mjs --local",
     "kv:create": "wrangler kv namespace create lixsketch"
   },
   "dependencies": {

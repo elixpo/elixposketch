@@ -252,7 +252,16 @@ export default function useDocAutoSave(active) {
             }
             if (data.updatedAt) _lastSeenUpdatedAt = data.updatedAt
             if (data.encryptedData) {
-              const encKey = useUIStore.getState().loadEncryptionKeyForSession?.(sessionId)
+              // Wait up to ~10s for the scene's per-session key to appear.
+              // Scene autosave loads it during its own hydration pass; we
+              // must NOT mount the editor with empty content until then,
+              // or subsequent saves will overwrite real cloud content.
+              let encKey = useUIStore.getState().loadEncryptionKeyForSession?.(sessionId)
+              const keyDeadline = Date.now() + 10_000
+              while (!encKey && Date.now() < keyDeadline && !cancelled) {
+                await new Promise((r) => setTimeout(r, 250))
+                encKey = useUIStore.getState().loadEncryptionKeyForSession?.(sessionId)
+              }
               if (encKey) {
                 try {
                   const decrypted = await decrypt(data.encryptedData, encKey)
@@ -262,7 +271,11 @@ export default function useDocAutoSave(active) {
                   console.warn('[DocAutoSave] decrypt failed:', err)
                 }
               } else {
-                console.log('[DocAutoSave] cloud doc exists but scene key not yet loaded — keeping local copy')
+                // Key never showed up. Don't replace whatever localStorage
+                // had — we keep showing the local copy and bail out of
+                // ready-state to avoid overwriting cloud with empty content.
+                console.warn('[DocAutoSave] scene key never loaded — leaving editor inactive')
+                return
               }
             }
           } else if (res.status !== 404) {

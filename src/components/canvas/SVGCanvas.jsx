@@ -33,26 +33,41 @@ export default function SVGCanvas() {
     //
     //  - `preserveAspectRatio="none"` is a belt-and-suspenders against
     //    any future viewBox/element aspect mismatch (e.g. mid-zoom).
+    const applyImperative = (w, h) => {
+      // Preserve zoom: viewBox width/height represent canvas-units that
+      // span the element. At zoom=1 they equal element pixels; at zoom=2
+      // they're half (smaller viewBox = magnified content).
+      const zoom = window.currentZoom || 1
+      const cv = window.currentViewBox || { x: 0, y: 0 }
+      const vbW = w / zoom
+      const vbH = h / zoom
+      const x = cv.x || 0
+      const y = cv.y || 0
+
+      window.currentViewBox = { x, y, width: vbW, height: vbH }
+
+      // Imperatively write the SVG attr so we don't fight the engine's
+      // own setAttribute calls on subsequent zoom/pan operations.
+      const el = svgRef.current
+      if (el) el.setAttribute('viewBox', `${x} ${y} ${vbW} ${vbH}`)
+    }
+
     const sync = () => {
       const el = svgRef.current
       if (!el) return
       const rect = el.getBoundingClientRect()
       const w = Math.max(1, Math.round(rect.width))
       const h = Math.max(1, Math.round(rect.height))
+      applyImperative(w, h)
+    }
 
+    // Initial React-state value (used only for the very first render
+    // before we take over imperatively).
+    {
+      const rect = svgRef.current?.getBoundingClientRect()
+      const w = Math.max(1, Math.round(rect?.width || window.innerWidth))
+      const h = Math.max(1, Math.round(rect?.height || window.innerHeight))
       setViewBox(`0 0 ${w} ${h}`)
-
-      // Keep the engine's view of canvas size aligned. Preserve current
-      // pan offset (x, y) — only width/height track the element.
-      if (typeof window !== 'undefined') {
-        const cv = window.currentViewBox || { x: 0, y: 0 }
-        window.currentViewBox = {
-          x: cv.x || 0,
-          y: cv.y || 0,
-          width: w,
-          height: h,
-        }
-      }
     }
 
     sync()
