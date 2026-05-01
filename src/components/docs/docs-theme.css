@@ -82,6 +82,33 @@
   border: 1px solid #3a3a50 !important;
 }
 
+/* Mantine dropdowns render in a portal at <body> level — they ignore the
+   editor wrapper's width. Cap them so they never overflow narrow split
+   panes (≤35% of viewport) and so the help / link / suggestion menus
+   stay usable. */
+.mantine-Menu-dropdown,
+.mantine-Popover-dropdown,
+.bn-suggestion-menu,
+.bn-link-toolbar,
+.bn-formatting-toolbar {
+  max-width: min(360px, 90vw) !important;
+  overflow: hidden;
+}
+
+.bn-suggestion-menu,
+.mantine-Menu-dropdown {
+  max-height: min(360px, 60vh) !important;
+  overflow-y: auto !important;
+}
+
+/* Truncate slash-menu item titles instead of wrapping into 3 lines */
+.bn-suggestion-menu-item,
+.mantine-Menu-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Floating toolbar buttons */
 .lix-sketch-theme .mantine-ActionIcon-root,
 .lix-sketch-theme .mantine-Button-root {
