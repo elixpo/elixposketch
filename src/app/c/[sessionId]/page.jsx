@@ -34,8 +34,15 @@ import CanvasLoadingOverlay from '@/components/canvas/CanvasLoadingOverlay'
 import ContextMenu from '@/components/canvas/ContextMenu'
 import FindBar from '@/components/canvas/FindBar'
 import SplitLayout from '@/components/docs/SplitLayout'
-import DocsPanel from '@/components/docs/DocsPanel'
+import dynamic from 'next/dynamic'
 import useSketchStore from '@/store/useSketchStore'
+
+// Lazy: only pulls BlockNote/Mantine/Mermaid into the bundle when the
+// docs panel is actually mounted (i.e. layoutMode is 'split' or 'docs').
+const DocsPanel = dynamic(() => import('@/components/docs/DocsPanel'), {
+  ssr: false,
+  loading: () => null,
+})
 
 export default function CanvasPage() {
   useEffect(() => {
