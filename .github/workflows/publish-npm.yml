@@ -35,6 +35,6 @@ jobs:
           fi
 
       - name: Publish to NPM
-        run: npm publish -w packages/lixsketch --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_LIXSKETCH_PUBLISH_TOKEN }}
+        run: npm publish --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=${{ secrets.NPM_LIXSKETCH_PUBLISH_TOKEN }}
+        working-directory: packages/lixsketch
+
