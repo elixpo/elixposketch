@@ -120,6 +120,17 @@
   caret-color: var(--bn-colors-selected-background);
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
+  /* IMPORTANT: do NOT add left/right padding here — BlockNote positions
+     the side-menu (+ / drag-handle) absolutely *to the left of* each
+     block, in the bn-editor's negative-x space. Padding here clips the
+     side-menu. The visible gutter is provided by the outer host below. */
+}
+
+/* Outer gutter so blocks aren't flush against the splitter, while the
+   side-menu still has room to poke into the editor's left margin. */
+.lix-editor-host {
+  padding-left: 3rem;   /* ~48px — enough for the side menu's icons */
+  padding-right: 1.5rem;
 }
 
 /* Block hover background */
