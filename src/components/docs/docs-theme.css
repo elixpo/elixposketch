@@ -120,16 +120,18 @@
   caret-color: var(--bn-colors-selected-background);
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
-  /* IMPORTANT: do NOT add left/right padding here — BlockNote positions
-     the side-menu (+ / drag-handle) absolutely *to the left of* each
-     block, in the bn-editor's negative-x space. Padding here clips the
-     side-menu. The visible gutter is provided by the outer host below. */
 }
 
-/* Outer gutter so blocks aren't flush against the splitter, while the
-   side-menu still has room to poke into the editor's left margin. */
-.lix-editor-host {
-  padding-left: 3rem;   /* ~48px — enough for the side menu's icons */
+/* Why this isn't on .lix-editor-host:
+   the host needs `overflow-y: auto` for vertical scroll, but the CSS
+   spec forces overflow-x to clip whenever overflow-y isn't `visible`.
+   The side-menu (drag handle / +) is positioned in the block's
+   negative-x space, so any clipped container left of it eats it.
+   By moving the gutter onto the inner wrapper instead, the side-menu
+   lands inside the wrapper's padding (positive-x of the host) and the
+   host never clips it. */
+.lix-sketch-theme .lix-editor-wrapper {
+  padding-left: 3rem;     /* ≥ side-menu width (~40px) */
   padding-right: 1.5rem;
 }
 
