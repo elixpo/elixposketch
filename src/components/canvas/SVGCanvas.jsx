@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import useSketchStore, { TOOLS } from '@/store/useSketchStore'
 import useSketchEngine from '@/hooks/useSketchEngine'
 
@@ -14,17 +14,49 @@ export default function SVGCanvas() {
   const getCursor = useSketchStore((s) => s.getCursor)
   const cursor = getCursor()
 
-  const [viewBox, setViewBox] = useState('0 0 1920 1080')
-
+  // viewBox is owned imperatively by the lixsketch engine (zoom/pan call
+  // svg.setAttribute('viewBox', …) directly). React must NOT re-render
+  // the viewBox prop or it'll snap back over engine writes — which is
+  // what was causing zoom deformity and the pan-release jump in split
+  // mode. The initial value is set in the effect below; React never
+  // rewrites it after that.
   useEffect(() => {
-    setViewBox(`0 0 ${window.innerWidth} ${window.innerHeight}`)
+    const applyImperative = (w, h) => {
+      const zoom = window.currentZoom || 1
+      const cv = window.currentViewBox || { x: 0, y: 0 }
+      const vbW = w / zoom
+      const vbH = h / zoom
+      const x = cv.x || 0
+      const y = cv.y || 0
+      window.currentViewBox = { x, y, width: vbW, height: vbH }
+      const el = svgRef.current
+      if (el) el.setAttribute('viewBox', `${x} ${y} ${vbW} ${vbH}`)
+    }
+
+    const sync = () => {
+      const el = svgRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const w = Math.max(1, Math.round(rect.width))
+      const h = Math.max(1, Math.round(rect.height))
+      applyImperative(w, h)
+    }
+
+    sync()
     setSvgReady(true)
 
-    const onResize = () => {
-      setViewBox(`0 0 ${window.innerWidth} ${window.innerHeight}`)
+    window.addEventListener('resize', sync)
+
+    let ro
+    if (typeof ResizeObserver !== 'undefined' && svgRef.current) {
+      ro = new ResizeObserver(sync)
+      ro.observe(svgRef.current)
     }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+
+    return () => {
+      window.removeEventListener('resize', sync)
+      if (ro) ro.disconnect()
+    }
   }, [])
 
   // Close icon sidebar when clicking on canvas without an icon ready to place
@@ -64,7 +96,7 @@ export default function SVGCanvas() {
         WebkitUserSelect: 'none',
         touchAction: 'none',
       }}
-      viewBox={viewBox}
+      preserveAspectRatio="none"
       suppressHydrationWarning
     >
       {gridEnabled && (
