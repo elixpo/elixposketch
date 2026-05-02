@@ -1,4 +1,4 @@
-# Integrating @elixpo/lixeditor: A Notion-Style Editor in 30 Lines
+# Integrating @elixpo/lixeditor: A Notion-Style WYSIWYG Editor 
 
 LixSketch is a canvas-first tool, but every diagram needs a doc next to it. Instead of building a WYSIWYG editor from scratch, we shipped one we'd already built for [blogs.elixpo](https://blogs.elixpo.com): **`@elixpo/lixeditor`**, published to npm.
 

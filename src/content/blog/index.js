@@ -7,7 +7,7 @@
 export const blogPosts = [
   {
     slug: 'lixeditor-integration',
-    title: 'Integrating @elixpo/lixeditor: A Notion-Style Editor in 30 Lines',
+    title: 'Integrating @elixpo/lixeditor: A Notion-Style WYSIWYG Editor',
     description: 'How we dropped a full WYSIWYG editor into LixSketch using the @elixpo/lixeditor npm package — three CSS imports, one provider, one component, plus the bugs we hit along the way.',
     icon: 'bx bx-text',
     date: '2026-05-02',
