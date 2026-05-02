@@ -122,33 +122,39 @@
   padding-bottom: 1.25rem;
 }
 
-/* The host is the scroll container; CSS forces overflow-x to clip when
-   overflow-y is auto, so any element rendered to the left of the editor
-   gets cut. We give the inner wrapper enough left padding for the side
-   menu to live in positive-x space. With the side menu stacked
-   vertically (rule below) it only needs room for one icon column. */
+/* The host has overflow-y: auto which forces overflow-x to clip too.
+   BlockNote's side menu is positioned by Floating UI in JS at
+   `left = block.left - menu.width`, putting it in the block's
+   negative-x space — clipped by the host. Two-part fix:
+     (1) increase wrapper padding-left so block.left starts further
+         right, giving Floating UI room.
+     (2) constrain the side-menu container width via CSS so its
+         computed left edge stays inside the host. */
 .lix-sketch-theme .lix-editor-wrapper {
-  padding-left: 2rem;
+  padding-left: 3.5rem;     /* > default side-menu width (~40px) */
   padding-right: 1.5rem;
 }
 
-/* Stack the +/drag-handle vertically. BlockNote renders them
-   side-by-side by default — at our split-pane widths the second icon
-   ends up clipped against the splitter. Vertical stacking takes ~half
-   the horizontal space, fits inside the gutter, and looks cleaner. */
+/* Stack the + and drag-handle vertically and tighten the container so
+   Floating UI's negative offset is small enough to land inside the
+   wrapper padding. */
 .lix-sketch-theme .bn-side-menu {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   gap: 1px;
   align-items: center;
+  width: 24px !important;
+  min-width: 24px !important;
 }
 
-/* Tighten the per-icon hit-target so the column is as narrow as
-   possible (each icon is ~22px). */
-.lix-sketch-theme .bn-side-menu > * {
-  width: 22px;
-  height: 22px;
-  padding: 0;
+/* Per-icon size — keep the column narrow (~22px) so the whole column
+   fits within the 24px container. */
+.lix-sketch-theme .bn-side-menu > *,
+.lix-sketch-theme .bn-side-menu button {
+  width: 22px !important;
+  height: 22px !important;
+  padding: 0 !important;
+  flex-shrink: 0;
 }
 
 /* Block hover background */
