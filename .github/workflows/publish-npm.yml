@@ -85,6 +85,10 @@ jobs:
           scope: '@elixpo'
 
       - name: Publish to GitHub Packages
+        # Non-blocking — see blogs.elixpo/publish-npm.yml for the full
+        # explanation; npmjs is the canonical registry, this mirror is
+        # best-effort until org packages permissions are configured.
+        continue-on-error: true
         working-directory: packages/lixsketch
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -96,7 +100,11 @@ jobs:
             pkg.repository = { type: 'git', url: 'git+https://github.com/${{ github.repository }}.git' };
             fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
-          npm publish --access public --registry https://npm.pkg.github.com
+          if npm publish --access public --registry https://npm.pkg.github.com; then
+            echo "::notice::Published to GitHub Packages."
+          else
+            echo "::warning::GitHub Packages publish failed (likely permission_denied: write_package). The npmjs publish above is canonical; this mirror is best-effort."
+          fi
           node -e "
             const fs = require('fs');
             const pkg = require('./package.json');
