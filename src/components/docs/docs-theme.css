@@ -111,6 +111,10 @@
 .lix-sketch-theme [data-content-type="codeBlock"] .shiki * {
   background: transparent !important;
   color: #d8d8e8;
+  /* Bump up from the package's 0.9em — too small to read comfortably
+     in the split-pane editor. */
+  font-size: 14px !important;
+  line-height: 1.6 !important;
 }
 
 /* The editable surface itself */
