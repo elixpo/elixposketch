@@ -122,17 +122,33 @@
   padding-bottom: 1.25rem;
 }
 
-/* Why this isn't on .lix-editor-host:
-   the host needs `overflow-y: auto` for vertical scroll, but the CSS
-   spec forces overflow-x to clip whenever overflow-y isn't `visible`.
-   The side-menu (drag handle / +) is positioned in the block's
-   negative-x space, so any clipped container left of it eats it.
-   By moving the gutter onto the inner wrapper instead, the side-menu
-   lands inside the wrapper's padding (positive-x of the host) and the
-   host never clips it. */
+/* The host is the scroll container; CSS forces overflow-x to clip when
+   overflow-y is auto, so any element rendered to the left of the editor
+   gets cut. We give the inner wrapper enough left padding for the side
+   menu to live in positive-x space. With the side menu stacked
+   vertically (rule below) it only needs room for one icon column. */
 .lix-sketch-theme .lix-editor-wrapper {
-  padding-left: 3rem;     /* ≥ side-menu width (~40px) */
+  padding-left: 2rem;
   padding-right: 1.5rem;
+}
+
+/* Stack the +/drag-handle vertically. BlockNote renders them
+   side-by-side by default — at our split-pane widths the second icon
+   ends up clipped against the splitter. Vertical stacking takes ~half
+   the horizontal space, fits inside the gutter, and looks cleaner. */
+.lix-sketch-theme .bn-side-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  align-items: center;
+}
+
+/* Tighten the per-icon hit-target so the column is as narrow as
+   possible (each icon is ~22px). */
+.lix-sketch-theme .bn-side-menu > * {
+  width: 22px;
+  height: 22px;
+  padding: 0;
 }
 
 /* Block hover background */
