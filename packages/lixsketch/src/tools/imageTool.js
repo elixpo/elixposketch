@@ -226,25 +226,49 @@ const handleImageUpload = async (file) => {
 
     console.log('Processing image file:', file.name, 'Size:', file.size, 'Type:', file.type);
 
-    const reader = new FileReader();
-    
-    // Store file size for room limit tracking
-    window.__pendingImageFileSize = file.size;
+    // Read → optionally compress → place. We compress client-side BEFORE
+    // placement so that consumers without an upload pipeline (VS Code
+    // extension, offline npm usage) still embed a compressed data URL
+    // rather than the original. SVGs are passed through unchanged because
+    // rasterizing them would destroy their vector fidelity.
+    try {
+        const rawDataUrl = await readFileAsDataUrl(file);
+        const isSvg = (file.type || '').toLowerCase() === 'image/svg+xml'
+            || (file.name || '').toLowerCase().endsWith('.svg');
 
-    reader.onload = (e) => {
-        imageToPlace = e.target.result;
+        let placedDataUrl = rawDataUrl;
+        let placedSize = file.size;
+        if (!isSvg) {
+            try {
+                const compressed = await compressImage(rawDataUrl);
+                if (compressed?.dataUrl) {
+                    placedDataUrl = compressed.dataUrl;
+                    placedSize = compressed.compressedSize || placedSize;
+                }
+            } catch (err) {
+                console.warn('[ImageTool] Pre-placement compression failed, using raw:', err);
+            }
+        }
+
+        window.__pendingImageFileSize = placedSize;
+        imageToPlace = placedDataUrl;
         isDraggingImage = true;
-        console.log('Image loaded and ready to place');
-    };
-    
-    reader.onerror = (error) => {
-        console.error('Error reading file:', error);
+        console.log('Image loaded and ready to place', { size: placedSize, isSvg });
+    } catch (err) {
+        console.error('Error reading file:', err);
         alert('Error reading the image file. Please try again.');
         isImageToolActive = false;
-    };
-    
-    reader.readAsDataURL(file);
+    }
 };
+
+function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+    });
+}
 
 // Add coordinate conversion function like in other tools
 function getSVGCoordsFromMouse(e) {
@@ -1290,7 +1314,7 @@ window.openImageFilePicker = function() {
     isImageToolActive = true;
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = 'image/*';
+    fileInput.accept = IMAGE_ACCEPT_ATTR;
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
 
