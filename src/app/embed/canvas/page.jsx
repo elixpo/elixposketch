@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Toolbar from '@/components/toolbar/Toolbar'
 import Footer from '@/components/footer/Footer'
 import RectangleSidebar from '@/components/sidebars/RectangleSidebar'
@@ -21,14 +21,17 @@ import ShortcutsModal from '@/components/modals/ShortcutsModal'
 import CommandPalette from '@/components/modals/CommandPalette'
 import ExportImageModal from '@/components/modals/ExportImageModal'
 import CanvasPropertiesModal from '@/components/modals/CanvasPropertiesModal'
-import useKeyboardShortcuts from '@/hooks/useKeyboardShortcuts'
+import { installEngineShortcuts } from '@elixpo/lixsketch'
 import useEmbedBridge, { postExitToHost } from '@/hooks/useEmbedBridge'
+import useSketchStore from '@/store/useSketchStore'
 
 // Embedded canvas — strips out the app shell (Header, AppMenu, SaveModal,
 // AIModal, HelpModal, ImageGenerateModal, DocsPanel, auth) and replaces
 // the URL-based session manager + autosave with a postMessage bridge to
 // the host application.
 export default function EmbedCanvasPage() {
+  const shortcutsInstalledRef = useRef(false)
+
   useEffect(() => {
     document.body.classList.add('canvas-mode', 'embed-mode')
     return () => {
@@ -36,7 +39,50 @@ export default function EmbedCanvasPage() {
     }
   }, [])
 
-  useKeyboardShortcuts()
+  // Engine-local shortcuts ship with the @elixpo/lixsketch package. We install
+  // them here once the engine is mounted and bridge tool changes through the
+  // sketch store so the toolbar stays in sync.
+  useEffect(() => {
+    let uninstall = null
+    let timer = null
+    function tryInstall() {
+      if (shortcutsInstalledRef.current) return
+      const engine = window.__sketchEngine
+      if (!engine) {
+        timer = setTimeout(tryInstall, 200)
+        return
+      }
+      uninstall = installEngineShortcuts(engine, {
+        skipWhen: (e) => {
+          // Defer to host overlays (e.g. command palette, find bar) by checking
+          // for any focused element with a non-empty data-shortcut-skip attr.
+          const t = e.target
+          return !!t?.closest?.('[data-shortcut-skip]')
+        },
+      })
+      shortcutsInstalledRef.current = true
+    }
+    tryInstall()
+    return () => {
+      if (timer) clearTimeout(timer)
+      if (uninstall) uninstall()
+      shortcutsInstalledRef.current = false
+    }
+  }, [])
+
+  // Bridge engine tool changes back to the React store so the toolbar UI
+  // reflects the active tool when shortcuts switch it.
+  useEffect(() => {
+    function syncToolFromEngine() {
+      const tool = window.__sketchEngine?.activeTool
+      if (tool && useSketchStore.getState().activeTool !== tool) {
+        useSketchStore.setState({ activeTool: tool })
+      }
+    }
+    const interval = setInterval(syncToolFromEngine, 200)
+    return () => clearInterval(interval)
+  }, [])
+
   useEmbedBridge()
 
   return (
