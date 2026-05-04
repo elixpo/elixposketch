@@ -3,6 +3,7 @@
 import { pushCreateAction, pushDeleteAction, pushTransformAction, pushFrameAttachmentAction } from '../core/UndoRedo.js';
 import { updateAttachedArrows as updateArrowsForShape, cleanupAttachments } from './arrowTool.js';
 import { compressImage } from '../utils/imageCompressor.js';
+import { isAllowedImage, IMAGE_ACCEPT_ATTR } from '../utils/allowedImageTypes.js';
 
 
 let isDraggingImage = false;
