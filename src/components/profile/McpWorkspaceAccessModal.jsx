@@ -253,7 +253,7 @@ export default function McpWorkspaceAccessModal({ workspace, onClose, onGrantCou
           <div className="mt-auto flex items-end justify-between gap-3 pt-4"><p className="max-w-52 text-[9px] leading-4 text-text-dim">You can revoke a client instantly without deleting canvas content.</p><button type="button" onClick={createGrant} disabled={busy || !encryptionKey || !label.trim()} className="shrink-0 cursor-pointer rounded-lg bg-[#8B88E8] px-3 py-2 text-xs text-white hover:bg-[#9E91EE] disabled:cursor-not-allowed disabled:opacity-40"><i className="bx bx-plus mr-1" />Create access</button></div>
         </section>
 
-        <div className={`flex h-full min-w-0 flex-col rounded-xl border p-4 ${visibleConfig ? 'border-[#54D6A0]/25 bg-[#54D6A0]/[0.045]' : 'border-[#8B88E8]/20 bg-[#8B88E8]/5'}`}>
+        <div className={`flex h-72 max-h-72 min-w-0 flex-col overflow-hidden rounded-xl border p-4 ${visibleConfig ? 'border-[#54D6A0]/25 bg-[#54D6A0]/[0.045]' : 'border-[#8B88E8]/20 bg-[#8B88E8]/5'}`}>
           {visibleConfig ? <>
             <div><p className="text-sm text-[#70DFB3]">Configuration ready</p><p className="mt-1 text-[10px] text-text-dim">Choose a client format and copy the complete block.</p></div>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
@@ -266,8 +266,8 @@ export default function McpWorkspaceAccessModal({ workspace, onClose, onGrantCou
             <div className="mt-3 rounded-lg border border-white/[0.07] bg-black/20 px-3 py-2 text-[9px] leading-4 text-text-muted">
               {configFormat === 'codex' ? <>Paste this entire block—including both <code className="font-[lixCode] text-[#d8c9f5]">[mcp_servers.lixsketch]</code> headings—into <code className="font-[lixCode] text-[#d8c9f5]">~/.codex/config.toml</code>.</> : <>Paste this complete JSON object into a client that accepts <code className="font-[lixCode] text-[#d8c9f5]">mcpServers</code> configuration.</>}
             </div>
-            <pre className="mt-3 max-h-52 min-h-0 overflow-auto rounded-lg bg-black/30 p-3 text-[10px] leading-5 text-[#d8c9f5]"><code>{visibleConfig}</code></pre>
-          </> : <div className="flex min-h-56 flex-1 flex-col items-center justify-center px-5 text-center"><i className="bx bx-code-block text-3xl text-[#A99CF1]" /><p className="mt-3 text-sm text-text-secondary">Your copy-ready configuration appears here</p><p className="mt-2 max-w-sm text-[10px] leading-5 text-text-dim">Create access or open a saved configuration. Choose MCP JSON for Cursor and similar clients, or Codex TOML for direct use in Codex.</p></div>}
+            <pre className="mt-3 min-h-0 flex-1 overflow-auto rounded-lg bg-black/30 p-3 text-[10px] leading-5 text-[#d8c9f5]"><code>{visibleConfig}</code></pre>
+          </> : <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5 text-center"><i className="bx bx-code-block text-3xl text-[#A99CF1]" /><p className="mt-3 text-sm text-text-secondary">Your copy-ready configuration appears here</p><p className="mt-2 max-w-sm text-[10px] leading-5 text-text-dim">Create access or open a saved configuration. Choose MCP JSON for Cursor and similar clients, or Codex TOML for direct use in Codex.</p></div>}
         </div>
         </div>
 
