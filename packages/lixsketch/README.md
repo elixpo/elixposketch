@@ -210,6 +210,20 @@ Deployment requires migration `0010_mcp_workspace_grants.sql`, a shared `MCP_REL
 
 The stdio channel is reserved for MCP JSON-RPC. Server status is written to stderr.
 
+Before configuring a client, verify the executable from the same terminal used to
+launch that client:
+
+```bash
+node --version
+command -v npx
+npx -y @elixpo/lixsketch@latest --help
+```
+
+Node.js 20 or newer is required. If a desktop or sandboxed client cannot resolve
+`npx`, set its MCP `command` to the absolute path returned by `command -v npx`.
+For Codex TOML configurations, set `startup_timeout_sec = 30` so the first package
+download has enough time to complete.
+
 ### MCP tools
 
 | Tool | Purpose |

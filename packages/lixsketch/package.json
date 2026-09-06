@@ -48,6 +48,9 @@
     "url": "https://github.com/elixpo"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "homepage": "https://sketch.elixpo.com",
   "repository": {
     "type": "git",
