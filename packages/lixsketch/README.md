@@ -214,6 +214,7 @@ Before configuring a client, verify the executable from the same terminal used t
 launch that client:
 
 ```bash
+type -a codex
 node --version
 command -v npx
 npx -y @elixpo/lixsketch@latest --help
@@ -221,8 +222,12 @@ npx -y @elixpo/lixsketch@latest --help
 
 Node.js 20 or newer is required. If a desktop or sandboxed client cannot resolve
 `npx`, set its MCP `command` to the absolute path returned by `command -v npx`.
+The generated website configuration uses the portable `npx` command because a
+website cannot inspect local executable paths. When multiple Codex installations
+exist, use the first installation that shares the working Node.js environment.
 For Codex TOML configurations, set `startup_timeout_sec = 30` so the first package
-download has enough time to complete.
+download has enough time to complete. `codex mcp list` confirms registration;
+restart Codex and use `/mcp` in a fresh session to confirm the handshake.
 
 ### MCP tools
 
