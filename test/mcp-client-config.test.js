@@ -37,6 +37,7 @@ test('creates Codex TOML directly and from saved MCP JSON', () => {
 
   assert.equal(recovered, direct)
   assert.match(direct, /^\[mcp_servers\.lixsketch\]/)
+  assert.match(direct, /startup_timeout_sec = 30/)
   assert.match(direct, /\[mcp_servers\.lixsketch\.env\]/)
   assert.match(direct, /LIXSKETCH_AGENT_TOKEN = "lixmcp_test-token"/)
   assert.match(direct, /LIXSKETCH_ENCRYPTION_KEY = "test_encryption-key"/)

@@ -35,6 +35,7 @@ const REMOTE_CONFIG = `{
 const CODEX_CONFIG = `[mcp_servers.lixsketch]
 command = "npx"
 args = ["-y", "@elixpo/lixsketch@latest", "--remote", "https://sketch.elixpo.com", "--workspace", "lx-..."]
+startup_timeout_sec = 30
 
 [mcp_servers.lixsketch.env]
 LIXSKETCH_AGENT_TOKEN = "lixmcp_..."
@@ -160,6 +161,7 @@ export default function McpDocsPage() {
               ['overview', 'Overview'],
               ['quick-start', 'Quick start'],
               ['agents', 'Agent setup'],
+              ['troubleshooting', 'Troubleshooting'],
               ['test', 'Test connection'],
               ['setup', 'Local scene'],
               ['remote', 'Remote workspace'],
@@ -233,6 +235,20 @@ export default function McpDocsPage() {
               </div>
             </div>
             <div className="mt-6 rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-xs leading-6 text-amber-100/75">Generated configurations contain workspace credentials. Keep personal config files out of source control, grant only necessary scopes, and revoke access from LixSketch when a client is no longer used.</div>
+          </DocSection>
+
+          <DocSection id="troubleshooting" title="Troubleshoot server startup">
+            <p className="mb-4">An error ending with <code className="font-[lixCode] text-accent">connection closed: initialize response</code> means the local command exited before the client completed the MCP handshake. It does not indicate a workspace or usage-limit error.</p>
+            <ol className="list-decimal space-y-3 pl-5">
+              <li>In the same terminal that launches the client, run <code className="font-[lixCode] text-accent">type -a codex</code>, <code className="font-[lixCode] text-accent">node --version</code>, and <code className="font-[lixCode] text-accent">command -v npx</code>. LixSketch requires Node.js 20 or newer and an accessible <code className="font-[lixCode] text-accent">npx</code>.</li>
+              <li>Run <code className="font-[lixCode] text-accent">npx -y @elixpo/lixsketch@latest --help</code>. Fix this command before testing it through an MCP client.</li>
+              <li>If more than one Codex installation is listed, use the first one from the same Node.js installation as the working <code className="font-[lixCode] text-accent">npx</code>. Remove or reorder stale installations if they shadow it.</li>
+              <li>If <code className="font-[lixCode] text-accent">npx</code> works in your shell but not in the client, replace <code className="font-[lixCode] text-accent">command = &quot;npx&quot;</code> with the absolute path returned by <code className="font-[lixCode] text-accent">command -v npx</code>. The LixSketch website cannot detect local executable paths, so this replacement is intentionally manual.</li>
+              <li>For Codex, keep <code className="font-[lixCode] text-accent">startup_timeout_sec = 30</code> in the generated TOML and restart Codex completely. <code className="font-[lixCode] text-accent">codex mcp list</code> confirms that the configuration was registered; <code className="font-[lixCode] text-accent">/mcp</code> in a fresh session confirms that the server actually started.</li>
+            </ol>
+            <div className="mt-5 rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-xs leading-6 text-amber-100/75">
+              Avoid unofficial or confined Codex packages when they cannot inherit your Node.js PATH. Install Codex through an official OpenAI distribution, then repeat the preflight commands above.
+            </div>
           </DocSection>
 
           <DocSection id="test" title="Test the workspace connection">
