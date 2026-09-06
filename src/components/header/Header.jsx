@@ -104,7 +104,7 @@ function ProfileStatusAvatar({ avatar }) {
   )
 }
 
-function ProfileControls() {
+function ProfileControls({ activeMcpClients = 0 }) {
   const profile = useProfileStore((s) => s.profile)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const authUser = useAuthStore((s) => s.user)
@@ -206,7 +206,7 @@ function ProfileControls() {
       <button
         onClick={testE2E}
         disabled={testingE2E}
-        className={`h-8 px-2 flex items-center justify-center gap-1 rounded-r-lg hover:bg-surface-hover transition-all cursor-pointer disabled:cursor-wait disabled:opacity-50 ${
+        className={`h-8 px-2 flex items-center justify-center gap-1 hover:bg-surface-hover transition-all cursor-pointer disabled:cursor-wait disabled:opacity-50 ${activeMcpClients > 0 ? '' : 'rounded-r-lg'} ${
           e2eResult === 'passed' ? 'text-green-400' : e2eResult === 'failed' ? 'text-red-400' : 'text-text-muted hover:text-accent'
         }`}
         title={e2eResult === 'passed' ? 'E2E database round-trip verified' : 'Test E2E encryption and database round-trip'}
@@ -215,6 +215,20 @@ function ProfileControls() {
         <i className={`bx ${testingE2E ? 'bx-loader-alt animate-spin' : e2eResult === 'passed' ? 'bx-check-shield' : e2eResult === 'failed' ? 'bx-error-circle' : 'bx-lock-alt'} text-sm`} />
         <span className="text-[10px] hidden lg:inline">{e2eResult === 'passed' ? 'Verified' : e2eResult === 'failed' ? 'Retry' : 'Test'}</span>
       </button>
+
+      {activeMcpClients > 0 && (
+        <>
+          <span className="h-6 w-px shrink-0 bg-border-light" aria-hidden="true" />
+          <span
+            className="flex h-8 items-center justify-center gap-1 rounded-r-lg px-2 text-[#70DFB3]"
+            title={`${activeMcpClients} active Remote MCP access grant${activeMcpClients === 1 ? '' : 's'}`}
+            aria-label={`Remote MCP access active for ${activeMcpClients} client${activeMcpClients === 1 ? '' : 's'}`}
+          >
+            <i className="bx bx-plug text-sm" aria-hidden="true" />
+            <span className="hidden text-[10px] lg:inline">MCP</span>
+          </span>
+        </>
+      )}
 
     </div>
   )
@@ -326,19 +340,12 @@ export default function Header() {
           />
         </label>
 
-        {activeMcpClients > 0 && (
-          <span className="hidden items-center gap-1 rounded-full border border-[#54D6A0]/20 bg-[#54D6A0]/10 px-2 py-1 text-[9px] text-[#70DFB3] sm:inline-flex" title={`${activeMcpClients} active Remote MCP client${activeMcpClients === 1 ? '' : 's'}`}>
-            <i className="bx bx-plug text-xs" />
-            MCP active
-          </span>
-        )}
-
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-2">
         {/* Profile pill owns identity, save state, and E2E status. */}
-        <ProfileControls />
+        <ProfileControls activeMcpClients={activeMcpClients} />
 
         {/* Command palette */}
         <button
