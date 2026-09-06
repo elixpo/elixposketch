@@ -230,9 +230,13 @@ export default function McpWorkspaceAccessModal({ workspace, onClose, onGrantCou
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) onClose() }}>
       <div role="dialog" aria-modal="true" aria-labelledby="mcp-access-title" className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-[#8B88E8]/30 bg-[#171120] p-5 shadow-2xl sm:p-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div><p className="text-[10px] uppercase tracking-[0.18em] text-[#A99CF1]">Workspace access</p><h2 id="mcp-access-title" className="mt-1 text-xl text-text-primary">Remote MCP</h2><p className="mt-1 text-xs text-text-dim">{workspace.workspace_name || 'Untitled'} · {sessionId}</p></div>
-          <button type="button" onClick={onClose} disabled={busy} className="cursor-pointer rounded-lg p-2 text-text-dim hover:bg-white/5 hover:text-text-primary"><i className="bx bx-x text-xl" /></button>
+          <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+            <a href="/docs/mcp#test" target="_blank" rel="noreferrer" className="cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-[10px] text-text-muted hover:bg-white/5 hover:text-text-primary"><i className="bx bx-book-open mr-1" />Guide</a>
+            <button type="button" onClick={copyTestPrompt} className="cursor-pointer rounded-lg bg-[#8B88E8] px-3 py-2 text-[10px] text-white hover:bg-[#9E91EE]"><i className={`bx ${testPromptCopied ? 'bx-check' : 'bx-copy'} mr-1`} />{testPromptCopied ? 'Copied' : 'Copy test prompt'}</button>
+            <button type="button" onClick={onClose} disabled={busy} className="ml-auto cursor-pointer rounded-lg p-2 text-text-dim hover:bg-white/5 hover:text-text-primary" aria-label="Close Remote MCP"><i className="bx bx-x text-xl" /></button>
+          </div>
         </div>
 
         <div className="mt-5 flex items-start gap-3 rounded-xl border border-[#8B88E8]/20 bg-[#8B88E8]/5 p-3.5 text-xs leading-5 text-text-muted"><span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#8B88E8]/10 text-[#B6ACF4]"><i className="bx bx-shield-quarter text-lg" /></span><div><p className="text-text-secondary">Private, workspace-scoped access</p><p className="mt-0.5 text-[10px] leading-5 text-text-dim">Configurations stay in this browser. The server stores a token hash and never receives your workspace E2E key.</p></div></div>
@@ -269,11 +273,6 @@ export default function McpWorkspaceAccessModal({ workspace, onClose, onGrantCou
             <pre className="mt-3 min-h-0 flex-1 overflow-auto rounded-lg bg-black/30 p-3 text-[10px] leading-5 text-[#d8c9f5]"><code>{visibleConfig}</code></pre>
           </> : <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5 text-center"><i className="bx bx-code-block text-3xl text-[#A99CF1]" /><p className="mt-3 text-sm text-text-secondary">Your copy-ready configuration appears here</p><p className="mt-2 max-w-sm text-[10px] leading-5 text-text-dim">Create access or open a saved configuration. Choose MCP JSON for Cursor and similar clients, or Codex TOML for direct use in Codex.</p></div>}
         </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#8B88E8]/20 bg-[#8B88E8]/[0.045] p-3.5">
-          <div className="flex min-w-0 items-start gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#8B88E8]/10 text-[#B6ACF4]"><i className="bx bx-test-tube text-lg" /></span><div><p className="text-xs text-text-secondary">Test the connection in your agent</p><p className="mt-0.5 text-[9px] leading-4 text-text-dim">No separate skill is required—the MCP server provides its workflow instructions. Restart your agent, then paste the verification prompt.</p></div></div>
-          <div className="flex shrink-0 items-center gap-2"><a href="/docs/mcp#test" target="_blank" rel="noreferrer" className="cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-[10px] text-text-muted hover:bg-white/5 hover:text-text-primary"><i className="bx bx-book-open mr-1" />Guide</a><button type="button" onClick={copyTestPrompt} className="cursor-pointer rounded-lg bg-[#8B88E8] px-3 py-2 text-[10px] text-white hover:bg-[#9E91EE]"><i className={`bx ${testPromptCopied ? 'bx-check' : 'bx-copy'} mr-1`} />{testPromptCopied ? 'Copied' : 'Copy test prompt'}</button></div>
         </div>
 
         <section className="mt-4 rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
